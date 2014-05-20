@@ -12,6 +12,14 @@
     <h:body>
         <h:form>
             <p:panelGrid columns="2">
+                
+                <h:outputLabel value="Tabela:" for="tabela" />
+                <p:selectOneListbox id="tabela" value="">
+                    <f:selectItem itemLabel="Lei 12773/12774" />
+                </p:selectOneListbox>
+                
+                <h:outputLabel value="Descrição da Tabela" />
+                <h:outputText value="Atuais leis em vigor do MPU e Judiciário. Mantém as tabelas de vencimento básico das Leis 11415 e 11416 e reajusta a GAMPU/GAJ de 50 para 90% após integralização." />
 
                 <h:outputLabel for="orgao" value="Órgão:" />
                 <p:selectOneMenu id="orgao" value="">
