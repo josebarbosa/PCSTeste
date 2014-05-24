@@ -32,6 +32,7 @@ public class SalarioBean implements Serializable{
     private List<SelectItem> cargos; 
     private String classe;
     private Integer padrao; 
+    private List<SelectItem> padroes;
     private Integer funcao;
     private Integer escolaridade;
     private Integer treinamento;
@@ -80,6 +81,30 @@ public class SalarioBean implements Serializable{
         return cargos;
     }
 
+    public List<SelectItem> getPadroes() {
+        if(this.padroes == null){
+            this.padroes = new ArrayList<SelectItem>();
+            /*
+            MPU e Judiciário adotam diferentes padrões de nomeclatura para promoção. No MPU, a mudança de classe (promoção) ocorre entre os níveis 3/4 e 8/9. 
+            Já o judiciário manteve a estrutura anterior, em que classes A e B são compostas de 5 padrões (1/5 e 6/10), sendo que a classe C possui apenas três níveis
+            */
+            if(orgao == 1){
+                for(int x = 1; x <= 13; x++){
+                    if(x<=3) this.padroes.add(new SelectItem("A" + x, x));
+                    if(4<=x && x<=8) this.padroes.add(new SelectItem("B" + x, x));
+                    if(9<=x && x<=13) this.padroes.add(new SelectItem("C" + x, x));
+                }
+            }else{
+                for(int x = 1; x <= 13; x++){
+                    if(x<=5) this.padroes.add(new SelectItem("A" + x, x));
+                    if(6<=x && x<=10) this.padroes.add(new SelectItem("B" + x, x));
+                    if(11<=x && x<=13) this.padroes.add(new SelectItem("C" + x, x));
+            }
+         }
+        }
+        return padroes;
+    }
+        
     public void setCargos(List<SelectItem> cargos) {
         this.cargos = cargos;
     }

@@ -24,6 +24,17 @@
                 <h:outputLabel value="2014" />
                 <h:outputLabel value="2015" />
                 
+                <h:outputLabel value="Classe/Padrão:" />
+                <h:selectOneMenu value="#{salarioBean.padrao}" id="padrao">
+                    <f:selectItems value="#{salarioBean.padroes}" id="padroes"
+                                   var="padrao"
+                                   itemLabel="#{padrao.descricao}"
+                                   itemValue="#{padrao.valor}" />
+                </h:selectOneMenu>
+                <h:outputLabel value="" />
+                <h:outputLabel value="" />
+                <h:outputLabel value="" />
+                <h:outputLabel value="" />
                 
                 <h:outputLabel value="Cargo Efetivo:" />
                 <h:selectOneMenu value="#{salarioBean.cargo}" id="cargo">
