@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+          <h:head>
+        <title>Simulação de Salários do Judiciário e MPU</title>
+    </h:head>
+    <h3>Simulação dos PLS do MPU e Judiciário</h3>
+    <p:outputLabel value="Planilha para cálculo personalizado de como ficarão os salários dos servidores do MPU e Judiciário refererntes aos anos de 2012 a 2015, com o reajuste da GAJ/GAMPU de 50 para 90%." />
+    
+    <h:body>
+        <h:form>
+            <h:panelGrid columns="6">
+                <h:outputLabel value="Órgão/Lei" />
+                <h:selectOneMenu value="#{salarioBean.orgao}" id="orgao">
+                    <f:selectItems value="#{salarioBean.orgaos}" id="ListaOrgaos"
+                                   var="orgaoDescricao"
+                                   itemLabel="#{orgaoDescricao.descricao}"
+                                   itemValue="#{orgaoDescricao.valor}" />
+                </h:selectOneMenu>
+                <h:outputLabel value="2012" />
+                <h:outputLabel value="2013" />
+                <h:outputLabel value="2014" />
+                <h:outputLabel value="2015" />
+                
+                
+                <h:outputLabel value="Cargo Efetivo:" />
+                <h:selectOneMenu value="#{salarioBean.cargo}" id="cargo">
+                    <f:selectItems value="#{salarioBean.cargos}" id="cargos"
+                                   var="cargo"
+                                   itemLabel="#{cargo.descricao}"
+                                   itemValue="#{cargo.valor}" />
+                </h:selectOneMenu>
+                <h:outputLabel value="#{salarioBean.cargo}" />
+                <h:outputLabel value="#{salarioBean.cargo}" />
+                <h:outputLabel value="#{salarioBean.cargo}" />
+                <h:outputLabel value="#{salarioBean.cargo}" />
+                
+                <h:outputLabel value="Alíquota de previdência" />
+                <h:selectOneMenu value="#{salarioBean.previdenciaAliquota}" id="previdencia">
+                    <f:selectItems value="#{salarioBean.previdenciaAliquotas}" id="ListaAliquotas"
+                                   var="aliquotaPrevidencia"
+                                   itemLabel="#{aliquotaPrevidencia.descricao}"
+                                   itemValue="#{aliquotaPrevidencia.valor}" />
+                </h:selectOneMenu>
+                <h:outputLabel value="PSS 2012" />
+                <h:outputLabel value="PSS 2013" />
+                <h:outputLabel value="PSS 2014" />
+                <h:outputLabel value="PSS 2015" />
+            </h:panelGrid>
+        </h:form>
+    </h:body>
+</html>
