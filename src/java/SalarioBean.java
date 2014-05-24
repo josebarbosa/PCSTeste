@@ -26,6 +26,29 @@ public class SalarioBean implements Serializable{
     private Integer orgao;
     private List<SelectItem> orgaos;
     
+    /*
+    Construtor
+        */
+    public SalarioBean(){
+        this.ano = 2012;
+        this.cargo = 1; 
+        this.padrao = 1;
+        this.funcao = 0;
+        this.escolaridade = 2;
+        this.treinamento = 0;
+        this.anuenio = 0;
+        this.dependentesIRRF = 0;
+        this.optaPlanAssiste = false;
+        this.conjugePlanAssiste = false;
+        this.filhosPlanAssiste = 0;
+        this.paisPlanAssiste = 0;
+        this.vpni = 0;
+        this.gas = false;
+        this.projeto = false; 
+        this.penosidade = false;
+        this.previdenciaAliquota = 11; 
+        
+    }
     //ano para cálculo da tabela
     private Integer ano;
     private Integer cargo;
@@ -35,8 +58,11 @@ public class SalarioBean implements Serializable{
     private List<SelectItem> padroes;
     private Integer funcao;
     private Integer escolaridade;
+    private List<SelectItem> escolaridades; 
     private Integer treinamento;
-    private Integer anuenios;
+    private List<SelectItem> treinamentos; 
+    private Integer anuenio;
+    private List<SelectItem> anuenios; 
     private Integer dependentesIRRF;
     private boolean optaPlanAssiste;
     private boolean conjugePlanAssiste;
@@ -46,8 +72,8 @@ public class SalarioBean implements Serializable{
     private double vpni;
     private boolean gas;
     private boolean projeto;
-    private double penosidade;
-    private double insalubridade; 
+    private boolean penosidade;
+    private boolean insalubridade; 
     private double previdenciaAliquota;
     private List<SelectItem> previdenciaAliquotas; 
     
@@ -62,6 +88,57 @@ public class SalarioBean implements Serializable{
     //valor que permite que servidores coloquem valores genéricos (como consignações), para terem melhor idéia do valor do real salário líquido. 
     private double outrosDescontos; 
 
+    public List<SelectItem> getTreinamentos() {
+        if(this.treinamentos == null){
+            this.treinamentos = new ArrayList<SelectItem>();
+            this.treinamentos.add(new SelectItem("0% - Menos de 120 horas", 0));
+            this.treinamentos.add(new SelectItem("1% - Entre 120 e 240 horas", 1));
+            this.treinamentos.add(new SelectItem("2% - Entre 240 e 360 horas", 2));
+            this.treinamentos.add(new SelectItem("3% - Acima de 360 horas", 3));
+         }
+        return treinamentos;
+    }
+
+    public void setTreinamentos(List<SelectItem> treinamentos) {
+        this.treinamentos = treinamentos;
+    }
+
+    public Integer getAnuenio() {
+        return anuenio;
+    }
+
+    public void setAnuenio(Integer anuenio) {
+        this.anuenio = anuenio;
+    }
+
+    public List<SelectItem> getAnuenios() {
+        if(this.anuenios == null){
+            this.anuenios = new ArrayList<SelectItem>();
+            for (Integer x=0; x <= 35; x++) this.anuenios.add(new SelectItem(x.toString(), x));
+        }
+        return anuenios;
+    }
+
+    public void setAnuenios(List<SelectItem> anuenios) {
+        this.anuenios = anuenios;
+    }
+
+    public List<SelectItem> getEscolaridades() {
+        if(this.escolaridades == null){
+            this.escolaridades = new ArrayList<SelectItem>();
+            this.escolaridades.add(new SelectItem("Ensino Médio", 2));
+            this.escolaridades.add(new SelectItem("Graduação ", 3));
+            this.escolaridades.add(new SelectItem("Especialização - Lato Sensu", 4));
+            this.escolaridades.add(new SelectItem("Mestrado - Stricto Sensu", 5));
+            this.escolaridades.add(new SelectItem("Doutorado - Stricto Sensu", 6));
+         }
+        return escolaridades;
+    }
+
+    public void setEscolaridades(List<SelectItem> escolaridades) {
+        this.escolaridades = escolaridades;
+    }
+
     
     
     public Integer getCargo() {
@@ -75,7 +152,7 @@ public class SalarioBean implements Serializable{
     public List<SelectItem> getCargos() {
          if(this.cargos == null){
             this.cargos = new ArrayList<SelectItem>();
-            this.cargos.add(new SelectItem("Analista)", 2));
+            this.cargos.add(new SelectItem("Analista", 2));
             this.cargos.add(new SelectItem("Técnico", 1));
          }
         return cargos;
@@ -87,20 +164,22 @@ public class SalarioBean implements Serializable{
             /*
             MPU e Judiciário adotam diferentes padrões de nomeclatura para promoção. No MPU, a mudança de classe (promoção) ocorre entre os níveis 3/4 e 8/9. 
             Já o judiciário manteve a estrutura anterior, em que classes A e B são compostas de 5 padrões (1/5 e 6/10), sendo que a classe C possui apenas três níveis
-            */
-            if(orgao == 1){
-                for(int x = 1; x <= 13; x++){
-                    if(x<=3) this.padroes.add(new SelectItem("A" + x, x));
-                    if(4<=x && x<=8) this.padroes.add(new SelectItem("B" + x, x));
-                    if(9<=x && x<=13) this.padroes.add(new SelectItem("C" + x, x));
+            TODO
+            if(getOrgao()== 1){
+                for(Integer x = 1; x <= 13; x++){
+                    if(x<=3) this.padroes.add(new SelectItem("A" + x.toString(), x));
+                    if(4<=x && x<=8) this.padroes.add(new SelectItem("B" + x.toString(), x));
+                    if(9<=x && x<=13) this.padroes.add(new SelectItem("C" + x.toString(), x));
                 }
             }else{
-                for(int x = 1; x <= 13; x++){
-                    if(x<=5) this.padroes.add(new SelectItem("A" + x, x));
-                    if(6<=x && x<=10) this.padroes.add(new SelectItem("B" + x, x));
-                    if(11<=x && x<=13) this.padroes.add(new SelectItem("C" + x, x));
-            }
+                for(Integer x = 1; x <= 13; x++){
+                    if(x<=5) this.padroes.add(new SelectItem("A" + x.toString(), x));
+                    if(6<=x && x<=10) this.padroes.add(new SelectItem("B" + x.toString(), x));
+                    if(11<=x && x<=13) this.padroes.add(new SelectItem("C" + x.toString(), x));
+            }       
          }
+             */
+           for(Integer x = 1; x <= 13; x++) this.padroes.add(new SelectItem(x.toString(), x));
         }
         return padroes;
     }
@@ -196,14 +275,6 @@ public class SalarioBean implements Serializable{
         this.treinamento = treinamento;
     }
 
-    public Integer getAnuenios() {
-        return anuenios;
-    }
-
-    public void setAnuenios(Integer anuenios) {
-        this.anuenios = anuenios;
-    }
-
     public Integer getDependentesIRRF() {
         return dependentesIRRF;
     }
@@ -244,21 +315,23 @@ public class SalarioBean implements Serializable{
         this.projeto = projeto;
     }
 
-    public double getPenosidade() {
+    public boolean isPenosidade() {
         return penosidade;
     }
 
-    public void setPenosidade(double penosidade) {
+    public void setPenosidade(boolean penosidade) {
         this.penosidade = penosidade;
     }
 
-    public double getInsalubridade() {
+    public boolean isInsalubridade() {
         return insalubridade;
     }
 
-    public void setInsalubridade(double insalubridade) {
+    public void setInsalubridade(boolean insalubridade) {
         this.insalubridade = insalubridade;
     }
+
+    
 
     public double getPrevidenciaAliquota() {
         return previdenciaAliquota;

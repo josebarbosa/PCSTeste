@@ -43,10 +43,109 @@
                                    itemLabel="#{cargo.descricao}"
                                    itemValue="#{cargo.valor}" />
                 </h:selectOneMenu>
-                <h:outputLabel value="#{salarioBean.cargo}" />
-                <h:outputLabel value="#{salarioBean.cargo}" />
-                <h:outputLabel value="#{salarioBean.cargo}" />
-                <h:outputLabel value="#{salarioBean.cargo}" />
+                <h:outputLabel value="" />
+                <h:outputLabel value="" />
+                <h:outputLabel value="" />
+                <h:outputLabel value="" />
+                
+                <h:outputLabel value="Função/CC (MPU|Jud):" />
+                <h:selectOneMenu value="#{salarioBean.funcao}" id="funcao">
+                    <f:selectItem itemLabel="Não" itemValue="50"/>
+                    <f:selectItem itemLabel="FC-1|FC-1" itemValue="51" />
+                    <f:selectItem itemLabel="FC-2|FC-2" itemValue="52" />
+                    <f:selectItem itemLabel="FC-3|FC-3" itemValue="53" />
+                    <f:selectItem itemLabel="CC-1|FC-4" itemValue="54" />
+                    <f:selectItem itemLabel="CC-2|FC-5" itemValue="55" />
+                    <f:selectItem itemLabel="CC-3|FC-6" itemValue="56" />
+                    <f:selectItem itemLabel="CC-4|CJ-1" itemValue="57" />
+                    <f:selectItem itemLabel="CC-5|CJ-2" itemValue="58" />
+                    <f:selectItem itemLabel="CC-6|CJ-3" itemValue="59" />
+                    <f:selectItem itemLabel="CC-7|CJ-4" itemValue="60" />  
+                </h:selectOneMenu>
+                <h:outputLabel value="" />
+                <h:outputLabel value="" />
+                <h:outputLabel value="" />
+                <h:outputLabel value="" />
+                
+                <h:outputLabel value="Formação Acadêmica:" />
+                <h:selectOneMenu value="#{salarioBean.escolaridade}" id="escolaridade">
+                    <f:selectItems value="#{salarioBean.escolaridades}" id="escolaridades"
+                                   var="item"
+                                   itemLabel="#{item.descricao}"
+                                   itemValue="#{item.valor}" />
+                </h:selectOneMenu>
+                <h:outputLabel value="" />
+                <h:outputLabel value="" />
+                <h:outputLabel value="" />
+                <h:outputLabel value="" />
+                
+                <h:outputLabel value="Treinamentos Institucionais:" />
+                <h:selectOneMenu value="#{salarioBean.treinamento}" id="treinamento">
+                    <f:selectItems value="#{salarioBean.treinamentos}" id="treinamentos"
+                                   var="item"
+                                   itemLabel="#{item.descricao}"
+                                   itemValue="#{item.valor}" />
+                </h:selectOneMenu>
+                <h:outputLabel value="" />
+                <h:outputLabel value="" />
+                <h:outputLabel value="" />
+                <h:outputLabel value="" />
+                
+                <h:outputLabel value="Anuênios:" />
+                <h:selectOneMenu value="#{salarioBean.anuenio}" id="anuenio">
+                    <f:selectItems value="#{salarioBean.anuenios}" id="anuenios"
+                                   var="item"
+                                   itemLabel="#{item.descricao}"
+                                   itemValue="#{item.valor}" />
+                </h:selectOneMenu>
+                <h:outputLabel value="" />
+                <h:outputLabel value="" />
+                <h:outputLabel value="" />
+                <h:outputLabel value="" />
+                
+                //dependentes
+                
+                <h:outputLabel value="Plan-Assiste:" for="titularPlanAssiste" />
+                <p:selectBooleanButton id="titularPlanAssiste" value="#{salarioBean.optaPlanAssiste}" offLabel="Não" onLabel="Sim" />
+                <h:outputLabel value="" />
+                <h:outputLabel value="" />
+                <h:outputLabel value="" />
+                <h:outputLabel value="" />
+                
+                <h:outputLabel value="Plan-Assiste:" for="conjugePlanAssiste" />
+                <p:selectBooleanButton id="conjugePlanAssiste" value="#{salarioBean.conjugePlanAssiste}" offLabel="Não" onLabel="Sim" />
+                <h:outputLabel value="" />
+                <h:outputLabel value="" />
+                <h:outputLabel value="" />
+                <h:outputLabel value="" />
+                
+                //plan assiste dependentes
+                
+                //plan assiste pais
+                
+                //dependentes auxílio creche
+                
+                //vpni
+                
+                //gas
+                
+                //projeto
+                
+                //penosidade
+                
+                //insalubridade
+                
+                //indenizações
+                
+                //salário bruto
+                
+                // pss
+                
+                //imposto de renda
+                
+                //outros descontos
+                
+                //salário líquido
                 
                 <h:outputLabel value="Alíquota de previdência" />
                 <h:selectOneMenu value="#{salarioBean.previdenciaAliquota}" id="previdencia">
