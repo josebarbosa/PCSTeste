@@ -30,6 +30,7 @@ public class SalarioBean implements Serializable{
     Construtor
         */
     public SalarioBean(){
+        this.orgao = 1; 
         this.ano = 2012;
         this.cargo = 1; 
         this.padrao = 1;
@@ -42,11 +43,13 @@ public class SalarioBean implements Serializable{
         this.conjugePlanAssiste = false;
         this.filhosPlanAssiste = 0;
         this.paisPlanAssiste = 0;
-        this.vpni = 0;
+        this.vpni = 0.0;
         this.gas = false;
         this.projeto = false; 
         this.penosidade = false;
+        this.insalubridade = false; 
         this.previdenciaAliquota = 11; 
+        this.dependentesAuxilioCreche = 0;
         
     }
     //ano para cálculo da tabela
@@ -64,11 +67,15 @@ public class SalarioBean implements Serializable{
     private Integer anuenio;
     private List<SelectItem> anuenios; 
     private Integer dependentesIRRF;
+    private List<SelectItem> dependentesIRRFs;
     private boolean optaPlanAssiste;
     private boolean conjugePlanAssiste;
     private Integer filhosPlanAssiste;
+    private List<SelectItem> filhosPlanAssistes;
     private Integer paisPlanAssiste; 
+    private List<SelectItem> paisPlanAssistes; 
     private Integer dependentesAuxilioCreche;
+    private List<SelectItem> dependentesAuxilioCreches; 
     private double vpni;
     private boolean gas;
     private boolean projeto;
@@ -88,6 +95,56 @@ public class SalarioBean implements Serializable{
     //valor que permite que servidores coloquem valores genéricos (como consignações), para terem melhor idéia do valor do real salário líquido. 
     private double outrosDescontos; 
 
+    public List<SelectItem> getDependentesAuxilioCreches() {
+        if(this.dependentesAuxilioCreches == null){
+            this.dependentesAuxilioCreches = new ArrayList<SelectItem>();
+            for (Integer x=0; x <= 5; x++) this.dependentesAuxilioCreches.add(new SelectItem(x.toString(), x));
+        }
+        return dependentesAuxilioCreches;
+    }
+
+    public void setDependentesAuxilioCreches(List<SelectItem> dependentesAuxilioCreches) {
+        this.dependentesAuxilioCreches = dependentesAuxilioCreches;
+    }
+    
+    public List<SelectItem> getDependentesIRRFs() {
+        if(this.dependentesIRRFs == null){
+            this.dependentesIRRFs = new ArrayList<SelectItem>();
+            for (Integer x=0; x <= 5; x++) this.dependentesIRRFs.add(new SelectItem(x.toString(), x));
+        }
+        return dependentesIRRFs;
+    }
+
+    public void setDependentesIRRFs(List<SelectItem> dependentesIRRFs) {
+        this.dependentesIRRFs = dependentesIRRFs;
+    }
+
+    public List<SelectItem> getFilhosPlanAssistes() {
+        if(this.filhosPlanAssistes == null){
+            this.filhosPlanAssistes = new ArrayList<SelectItem>();
+            for (Integer x=0; x <= 5; x++) this.filhosPlanAssistes.add(new SelectItem(x.toString(), x));
+        }
+        return filhosPlanAssistes;
+    }
+
+    public void setFilhosPlanAssistes(List<SelectItem> filhosPlanAssistes) {
+        this.filhosPlanAssistes = filhosPlanAssistes;
+    }
+
+    public List<SelectItem> getPaisPlanAssistes() {
+        if(this.paisPlanAssistes == null){
+            this.paisPlanAssistes = new ArrayList<SelectItem>();
+            for (Integer x=0; x <= 4; x++) this.paisPlanAssistes.add(new SelectItem(x.toString(), x));
+        }
+        return paisPlanAssistes;
+    }
+
+    public void setPaisPlanAssistes(List<SelectItem> paisPlanAssistes) {
+        this.paisPlanAssistes = paisPlanAssistes;
+    }
+
+    
+    
     public List<SelectItem> getTreinamentos() {
         if(this.treinamentos == null){
             this.treinamentos = new ArrayList<SelectItem>();
