@@ -1,5 +1,8 @@
 
 import java.io.Serializable;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.faces.bean.ManagedBean;
@@ -94,6 +97,277 @@ public class SalarioBean implements Serializable{
     private double planAssiste;
     //valor que permite que servidores coloquem valores genéricos (como consignações), para terem melhor idéia do valor do real salário líquido. 
     private double outrosDescontos; 
+    
+    /*
+    Aqui ficarão as variáveis que serão os valores das verbas salariais, que serão apresentadas na página.
+    */
+    private double vencimentoBasico;
+    private double gampuValor;
+    private double funcaoValor;
+    private double formacaoAcademicaValor;
+    private double treinamentosValor;
+    private double anueniosValor; 
+    private double previdenciaValor; 
+    private double planAssisteTitularValor;
+    private double planAssisteConjugeValor;
+    private double planAssisteFilhosValor;
+    private double planAssistePaisValor; 
+    private double auxilioAlimentacaoValor;
+    private double auxilioCrecheValor; 
+    private double vpiValor = 59.87;
+    private double vpniValor; 
+    private double gasValor;
+    private double projetoValor;
+    private double penosidadeValor;
+    private double insalubridadeValor; 
+    private double indenizacoesValor;
+    private double salarioBrutoValor;
+    private double outrosDescontosValor;
+    private double impostoDeRendaValor;
+    private double descontosTotalValor;
+    private double salarioLiquidoValor; 
+
+    public double getVencimentoBasico() {
+        return vencimentoBasico;
+    }
+
+    public void setVencimentoBasico(double vencimentoBasico) {
+        this.vencimentoBasico = vencimentoBasico;
+    }
+
+    public double getGampuValor() {
+        return gampuValor;
+    }
+
+    public void setGampuValor(double gampuValor) {
+        this.gampuValor = gampuValor;
+    }
+
+    public double getFuncaoValor() {
+        return funcaoValor;
+    }
+
+    public void setFuncaoValor(double funcaoValor) {
+        this.funcaoValor = funcaoValor;
+    }
+
+    public double getFormacaoAcademicaValor() {
+        return formacaoAcademicaValor;
+    }
+
+    public void setFormacaoAcademicaValor(double formacaoAcademicaValor) {
+        this.formacaoAcademicaValor = formacaoAcademicaValor;
+    }
+
+    public double getTreinamentosValor() {
+        return treinamentosValor;
+    }
+
+    public void setTreinamentosValor(double treinamentosValor) {
+        this.treinamentosValor = treinamentosValor;
+    }
+
+    public double getAnueniosValor() {
+        return anueniosValor;
+    }
+
+    public void setAnueniosValor(double anueniosValor) {
+        this.anueniosValor = anueniosValor;
+    }
+
+    public double getPrevidenciaValor() {
+        return previdenciaValor;
+    }
+
+    public void setPrevidenciaValor(double previdenciaValor) {
+        this.previdenciaValor = previdenciaValor;
+    }
+
+    public double getPlanAssisteTitularValor() {
+        return planAssisteTitularValor;
+    }
+
+    public void setPlanAssisteTitularValor(double planAssisteTitularValor) {
+        this.planAssisteTitularValor = planAssisteTitularValor;
+    }
+
+    public double getPlanAssisteConjugeValor() {
+        return planAssisteConjugeValor;
+    }
+
+    public void setPlanAssisteConjugeValor(double planAssisteConjugeValor) {
+        this.planAssisteConjugeValor = planAssisteConjugeValor;
+    }
+
+    public double getPlanAssisteFilhosValor() {
+        return planAssisteFilhosValor;
+    }
+
+    public void setPlanAssisteFilhosValor(double planAssisteFilhosValor) {
+        this.planAssisteFilhosValor = planAssisteFilhosValor;
+    }
+
+    public double getPlanAssistePaisValor() {
+        return planAssistePaisValor;
+    }
+
+    public void setPlanAssistePaisValor(double planAssistePaisValor) {
+        this.planAssistePaisValor = planAssistePaisValor;
+    }
+
+    public double getAuxilioAlimentacaoValor() {
+        return auxilioAlimentacaoValor;
+    }
+
+    public void setAuxilioAlimentacaoValor(double auxilioAlimentacaoValor) {
+        this.auxilioAlimentacaoValor = auxilioAlimentacaoValor;
+    }
+
+    public double getAuxilioCrecheValor() {
+        return auxilioCrecheValor;
+    }
+
+    public void setAuxilioCrecheValor(double auxilioCrecheValor) {
+        this.auxilioCrecheValor = auxilioCrecheValor;
+    }
+
+    public double getVpiValor() {
+        return vpiValor;
+    }
+
+    public void setVpiValor(double vpiValor) {
+        this.vpiValor = vpiValor;
+    }
+
+    public double getVpniValor() {
+        return vpniValor;
+    }
+
+    public void setVpniValor(double vpniValor) {
+        this.vpniValor = vpniValor;
+    }
+
+    public double getGasValor() {
+        return gasValor;
+    }
+
+    public void setGasValor(double gasValor) {
+        this.gasValor = gasValor;
+    }
+
+    public double getProjetoValor() {
+        return projetoValor;
+    }
+
+    public void setProjetoValor(double projetoValor) {
+        this.projetoValor = projetoValor;
+    }
+
+    public double getPenosidadeValor() {
+        return penosidadeValor;
+    }
+
+    public void setPenosidadeValor(double penosidadeValor) {
+        this.penosidadeValor = penosidadeValor;
+    }
+
+    public double getInsalubridadeValor() {
+        return insalubridadeValor;
+    }
+
+    public void setInsalubridadeValor(double insalubridadeValor) {
+        this.insalubridadeValor = insalubridadeValor;
+    }
+
+    public double getIndenizacoesValor() {
+        return indenizacoesValor;
+    }
+
+    public void setIndenizacoesValor(double indenizacoesValor) {
+        this.indenizacoesValor = indenizacoesValor;
+    }
+
+    public double getSalarioBrutoValor() {
+        return salarioBrutoValor;
+    }
+
+    public void setSalarioBrutoValor(double salarioBrutoValor) {
+        this.salarioBrutoValor = salarioBrutoValor;
+    }
+
+    public double getOutrosDescontosValor() {
+        return outrosDescontosValor;
+    }
+
+    public void setOutrosDescontosValor(double outrosDescontosValor) {
+        this.outrosDescontosValor = outrosDescontosValor;
+    }
+
+    public double getImpostoDeRendaValor() {
+        return impostoDeRendaValor;
+    }
+
+    public void setImpostoDeRendaValor(double impostoDeRendaValor) {
+        this.impostoDeRendaValor = impostoDeRendaValor;
+    }
+
+    public double getDescontosTotalValor() {
+        return descontosTotalValor;
+    }
+
+    public void setDescontosTotalValor(double descontosTotalValor) {
+        this.descontosTotalValor = descontosTotalValor;
+    }
+
+    public double getSalarioLiquidoValor() {
+        return salarioLiquidoValor;
+    }
+
+    public void setSalarioLiquidoValor(double salarioLiquidoValor) {
+        this.salarioLiquidoValor = salarioLiquidoValor;
+    }
+    
+    
+    //Esta lista conterá todos os valores e depois serão feitos os cálculos com base nas somas
+    private List<Rubrica> rubricas; 
+    
+    /*
+    Método para adicionar todas as rubricas numa lista e depois serem retornadas. 
+    */
+    public List<Rubrica> calculaBruto(){
+        //escrever aqui um método que vai adicionando cada verba ao salário.
+        //gerar uma linha para cada  verba
+        return rubricas; 
+    }
+    /*
+    função que busca o cargo e nível de referência no banco de dados e retorna o valor do vencimento básico
+    */
+    public double calculaVencimentoBasico(){
+       
+        
+        
+        return vencimentoBasico; 
+    }
+
+    /*
+    Apenas para teste de conexão do banco de dados. 
+    Manter comentado após o uso
+    ################################
+     */
+    public static void main(String[] args) throws SQLException {
+        Connection conexao = DriverManager.getConnection(
+          "jdbc:mysql://dbmy0041.whservidor.com/josebarbos_1", );
+        System.out.println("Conectado!");
+        conexao.close();
+    }
+   
+    public List<Rubrica> getRubricas() {
+        return rubricas;
+    }
+
+    public void setRubricas(List<Rubrica> rubricas) {
+        this.rubricas = rubricas;
+    }
 
     public List<SelectItem> getDependentesAuxilioCreches() {
         if(this.dependentesAuxilioCreches == null){
