@@ -13,9 +13,9 @@ import java.io.Serializable;
  */
 public class SelectItem implements Serializable{
     private String descricao;
-    private double valor; 
+    private Integer valor; 
     
-    public SelectItem(String descricao, double valor){
+    public SelectItem(String descricao, Integer valor){
         this.descricao = descricao;
         this.valor = valor; 
     }
@@ -28,11 +28,11 @@ public class SelectItem implements Serializable{
         this.descricao = descricao;
     }
 
-    public double getValor() {
+    public Integer getValor() {
         return valor;
     }
 
-    public void setValor(double valor) {
+    public void setValor(Integer valor) {
         this.valor = valor;
     }
     

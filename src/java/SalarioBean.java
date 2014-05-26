@@ -1,10 +1,14 @@
 
+import br.com.josebarbosa.conexao.ConectaMySQL;
 import java.io.Serializable;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.faces.bean.ManagedBean;
 import javax.faces.view.ViewScoped;
-import br.com.josebarbosa.conexao.ConectaMySQL;
 
 
 /*
@@ -34,7 +38,7 @@ public class SalarioBean implements Serializable{
     public SalarioBean(){
         this.orgao = 1; 
         this.ano = 2012;
-        this.cargo = 1; 
+        this.cargo = 2; 
         this.padrao = 1;
         this.funcao = 0;
         this.escolaridade = 2;
@@ -341,14 +345,37 @@ public class SalarioBean implements Serializable{
     /*
     função que busca o cargo e nível de referência no banco de dados e retorna o valor do vencimento básico
     */
-    public double calculaVencimentoBasico(){
+    public double calculaVencimentoBasico() throws SQLException, ClassNotFoundException{
         //Faz a conexão no banco e procura na tabela vencimento pelo 
         
         /*
         exemplo de sql que ilustra o funcionamenot
-        SELECT valor FROM `vencimentosMPU` WHERE id_escolaridade=2 and nivel=9 and ano<=2013 order by ano desc, mes desc limit 1; 
+        SELECT valor FROM `vencimentosMPU` WHERE id_escolaridade=2 and nivel<=9 and ano<=2013 order by ano desc, mes desc, nivel desc limit 1; 
         */
+        Connection conexao = new ConectaMySQL().conectaUOL();
+        String sql = "SELECT valor FROM `vencimentosMPU` WHERE id_escolaridade=? and nivel<=? and ano<=? order by ano desc, mes desc, nivel desc limit 1";
         
+        try{
+            PreparedStatement stmt = conexao.prepareStatement(sql);
+            stmt.setInt(1, this.getCargo());
+            stmt.setInt(2, this.getPadrao());
+            stmt.setInt(3, this.getAno());
+            ResultSet rs = stmt.executeQuery();
+
+            rs.next();
+            this.vencimentoBasico = rs.getDouble(1);
+            //apenas para teste, imprimir o valor buscado no banco
+            System.out.println(this.getVencimentoBasico());
+            rs.close();
+            //stmt.execute();
+            stmt.close();
+        }catch(SQLException e){
+            throw new RuntimeException(e);
+        }
+        
+        // executa um select
+        
+        conexao.close();
         
         return vencimentoBasico; 
     }
@@ -479,8 +506,8 @@ public class SalarioBean implements Serializable{
     public List<SelectItem> getCargos() {
          if(this.cargos == null){
             this.cargos = new ArrayList<SelectItem>();
-            this.cargos.add(new SelectItem("Analista", 2));
-            this.cargos.add(new SelectItem("Técnico", 1));
+            this.cargos.add(new SelectItem("Analista", 3));
+            this.cargos.add(new SelectItem("Técnico", 2));
          }
         return cargos;
     }
@@ -506,7 +533,7 @@ public class SalarioBean implements Serializable{
             }       
          }
              */
-           for(Integer x = 1; x <= 13; x++) this.padroes.add(new SelectItem(x.toString(), x));
+           for(Integer x = 1; x <= 15; x++) this.padroes.add(new SelectItem(x.toString(), x));
         }
         return padroes;
     }
@@ -673,9 +700,9 @@ public class SalarioBean implements Serializable{
             this.previdenciaAliquotas = new ArrayList<SelectItem>();
             this.previdenciaAliquotas.add(new SelectItem("Regime Próprio", 11));
             this.previdenciaAliquotas.add(new SelectItem("Não optante Funpresp", 0));
-            this.previdenciaAliquotas.add(new SelectItem("Funpresp: 7,5%", 7.5));
+            this.previdenciaAliquotas.add(new SelectItem("Funpresp: 7,5%", 7));
             this.previdenciaAliquotas.add(new SelectItem("Funpresp: 8,0%", 8));
-            this.previdenciaAliquotas.add(new SelectItem("Funpresp: 8,5%", 8.5));
+            this.previdenciaAliquotas.add(new SelectItem("Funpresp: 8,5%", 9));
         }
         return previdenciaAliquotas;
     }
