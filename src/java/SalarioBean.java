@@ -1,12 +1,11 @@
 
 import java.io.Serializable;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.faces.bean.ManagedBean;
 import javax.faces.view.ViewScoped;
+import br.com.josebarbosa.conexao.ConectaMySQL;
+
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -343,24 +342,21 @@ public class SalarioBean implements Serializable{
     função que busca o cargo e nível de referência no banco de dados e retorna o valor do vencimento básico
     */
     public double calculaVencimentoBasico(){
-       
+        //Faz a conexão no banco e procura na tabela vencimento pelo 
+        
+        /*
+        exemplo de sql que ilustra o funcionamenot
+        SELECT valor FROM `vencimentosMPU` WHERE id_escolaridade=2 and nivel=9 and ano<=2013 order by ano desc, mes desc limit 1; 
+        */
         
         
         return vencimentoBasico; 
     }
 
     /*
-    Apenas para teste de conexão do banco de dados. 
-    Manter comentado após o uso
-    ################################
-     */
-    public static void main(String[] args) throws SQLException {
-        Connection conexao = DriverManager.getConnection(
-          "jdbc:mysql://dbmy0041.whservidor.com/josebarbos_1", );
-        System.out.println("Conectado!");
-        conexao.close();
-    }
-   
+    Conexão de banco de dados??
+    */
+       
     public List<Rubrica> getRubricas() {
         return rubricas;
     }

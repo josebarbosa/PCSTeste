@@ -16,6 +16,7 @@ import java.sql.SQLException;
 
 public class ConectaMySQL {
     
+    
     final private String driver = "com.mysql.jdbc.Driver";
     final private String url = "jdbc:mysql://localhost/monografia";
     final private String usuario = "fulano";
@@ -24,6 +25,11 @@ public class ConectaMySQL {
     private Connection conexao;
     public Statement statement; 
     public ResultSet resultset;
+    
+    public Connection conectaUOL() throws SQLException{
+         conexao = DriverManager.getConnection("jdbc:mysql://dbmy0041.whservidor.com/josebarbos_1", "josebarbos_1", "");
+         return conexao;
+    }
     
     public boolean conecta(){
         boolean result = true;
