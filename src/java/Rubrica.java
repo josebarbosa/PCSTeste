@@ -14,7 +14,7 @@
 public class Rubrica {
     
     private double valor;
-    private double indice;
+    private String nomeRubica; 
     private boolean incideImpostoRenda;
     private boolean incidePrevidencia;
     private boolean ehCredito; 
@@ -31,12 +31,12 @@ public class Rubrica {
         this.valor = valor;
     }
 
-    public double getIndice() {
-        return indice;
+    public String getNomeRubica() {
+        return nomeRubica;
     }
 
-    public void setIndice(double indice) {
-        this.indice = indice;
+    public void setNomeRubica(String nomeRubica) {
+        this.nomeRubica = nomeRubica;
     }
 
     public boolean isIncideImpostoRenda() {

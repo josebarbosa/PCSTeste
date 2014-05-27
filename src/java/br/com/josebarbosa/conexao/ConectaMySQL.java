@@ -29,7 +29,8 @@ public class ConectaMySQL {
     public Connection conectaUOL() throws ClassNotFoundException {
         try{
             Class.forName("com.mysql.jdbc.Driver"); 
-            conexao = DriverManager.getConnection("jdbc:mysql://dbmy0041.whservidor.com/josebarbos_1", "josebarbos_1", "");
+            conexao = DriverManager.getConnection
+        ("jdbc:mysql://dbmy0041.whservidor.com/josebarbos_1", "josebarbos_1", "");
         }catch(SQLException e){
             throw new RuntimeException(e);
         }
