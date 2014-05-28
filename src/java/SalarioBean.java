@@ -8,6 +8,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import javax.faces.bean.ManagedBean;
 import javax.faces.view.ViewScoped;
@@ -59,7 +60,11 @@ public class SalarioBean implements Serializable{
         this.insalubridade = false; 
         this.previdenciaAliquota = 11; 
         this.dependentesAuxilioCreche = 0;
-        
+        this.salarioBrutoValor = 0;
+        this.salarioLiquidoValor = 0;
+        this.baseDeCalculoIRRF = 0;
+        this.baseDeCalculoPSS = 0;
+        this.rubricas = new ArrayList<>();
     }
     //ano para cálculo da tabela
     private Integer ano;
@@ -128,6 +133,8 @@ public class SalarioBean implements Serializable{
     private double insalubridadeValor; 
     private double indenizacoesValor;
     private double salarioBrutoValor;
+    private double baseDeCalculoPSS;
+    private double baseDeCalculoIRRF; 
     private double outrosDescontosValor;
     private double impostoDeRendaValor;
     private double descontosTotalValor;
@@ -145,10 +152,12 @@ public class SalarioBean implements Serializable{
         //escrever aqui um método que vai adicionando cada verba ao salário.
         //gerar uma linha para cada  verba
         
-        //zera a lista, se ela já tiver sido criada
-        List<Rubrica> rubricas = new ArrayList<>();
+       
+       
                 
         for(int x = 0; x <=3; x++){
+             //zera a lista, se ela já tiver sido criada
+            
             this.ano = 2012 + x; 
             
             rubricas.add(calculaVencimentoBasico());
@@ -177,9 +186,96 @@ public class SalarioBean implements Serializable{
             vpni.setAnoReferencia(this.getAno());
             vpni.setValor(59.87 + this.getVpni());
             rubricas.add(vpni);
+            
+            rubricas.add(calculaAuxilioIndenizacoes());
+            
+            rubricas.add(calculaBrutoValor());
         }
         return rubricas; 
     }
+    
+    public Rubrica calculaBrutoValor(){
+        Rubrica salarioBruto = new Rubrica();
+        salarioBruto.setAnoReferencia(this.getAno());
+        //não entrará nos cálculos de imposto de renda ou previdência para evitar duplicidades
+        salarioBruto.setIncideImpostoRenda(false);
+        salarioBruto.setIncidePrevidencia(false);
+        salarioBruto.setNomeRubrica("Salário Bruto: ");
+        
+       
+        /*
+        Trabalhar aqui para zerar a lista e evitar a bola de neve
+        */
+        for(int x = 0; x < this.rubricas.size(); x++) { 
+            
+            this.salarioBrutoValor = this.salarioBrutoValor + rubricas.get(x).getValor();
+            if(rubricas.get(x).isIncideImpostoRenda()) this.baseDeCalculoIRRF = this.baseDeCalculoIRRF + rubricas.get(x).getValor();
+            if(rubricas.get(x).isIncidePrevidencia()) this.baseDeCalculoPSS = this.baseDeCalculoPSS + rubricas.get(x).getValor();
+            System.out.println(this.salarioBrutoValor + " PSS e IRRF1 " + this.baseDeCalculoIRRF + " base de PSS " + this.baseDeCalculoPSS);
+        }
+        
+        salarioBruto.setValor(this.salarioBrutoValor);
+        
+        return salarioBruto;                
+    }
+    
+    public Rubrica calculaAuxilioIndenizacoes() throws ClassNotFoundException, SQLException{
+        Connection conexao = new ConectaMySQL().conectaUOL();
+        String sql = "SELECT valor FROM `auxiliosMPU` WHERE nivel=0 and orgao=? and ano<=? order by ano desc, mes desc limit 1";
+        
+        
+        try{
+            PreparedStatement stmt = conexao.prepareStatement(sql);
+            stmt.setInt(1, this.getOrgao());
+            stmt.setInt(2, this.getAno());
+            ResultSet rs = stmt.executeQuery();
+
+            rs.next();
+            this.auxilioAlimentacaoValor = rs.getDouble(1);
+            //apenas para teste, imprimir o valor buscado no banco
+            rs.close();
+            //stmt.execute();
+            stmt.close();
+        }catch(SQLException e){
+            throw new RuntimeException(e);
+        }
+        
+        Rubrica auxilioAlimentacao = new Rubrica();
+        auxilioAlimentacao.setNomeRubrica("Auxílio Alimentação");
+        auxilioAlimentacao.setAnoReferencia(this.getAno());
+        auxilioAlimentacao.setValor(this.auxilioAlimentacaoValor);
+        auxilioAlimentacao.setIncidePrevidencia(false);
+        auxilioAlimentacao.setIncideImpostoRenda(false);
+        auxilioAlimentacao.setIncidePrevidencia(false);
+        
+        if(this.getDependentesAuxilioCreche()!=0){
+            sql =  "SELECT valor FROM `auxiliosMPU` WHERE nivel=1 and orgao=? and ano<=? order by ano desc, mes desc limit 1";
+        
+            try{
+                PreparedStatement stmt = conexao.prepareStatement(sql);
+                stmt.setInt(1, this.getOrgao());
+                stmt.setInt(2, this.getAno());
+                ResultSet rs = stmt.executeQuery();
+
+                rs.next();
+                this.auxilioCrecheValor = rs.getDouble(1);
+                //apenas para teste, imprimir o valor buscado no banco
+                rs.close();
+                //stmt.execute();
+                stmt.close();
+                
+                auxilioAlimentacao.setNomeRubrica("Indenizações: Alimentação e Creche");
+                this.setIndenizacoesValor(this.auxilioAlimentacaoValor + this.auxilioCrecheValor * this.getDependentesAuxilioCreche());
+                auxilioAlimentacao.setValor(this.getIndenizacoesValor());
+                
+            }catch(SQLException e){
+                throw new RuntimeException(e);
+            }
+        }
+        conexao.close();
+        
+        return auxilioAlimentacao; 
+}
     
     public Rubrica calculaGasGae(){
         Rubrica adicionalTreinamentoValor = new Rubrica();
@@ -525,6 +621,22 @@ public class SalarioBean implements Serializable{
 
     public void setConjugePlanAssiste(boolean conjugePlanAssiste) {
         this.conjugePlanAssiste = conjugePlanAssiste;
+    }
+
+    public double getBaseDeCalculoPSS() {
+        return baseDeCalculoPSS;
+    }
+
+    public void setBaseDeCalculoPSS(double baseDeCalculoPSS) {
+        this.baseDeCalculoPSS = baseDeCalculoPSS;
+    }
+
+    public double getBaseDeCalculoIRRF() {
+        return baseDeCalculoIRRF;
+    }
+
+    public void setBaseDeCalculoIRRF(double baseDeCalculoIRRF) {
+        this.baseDeCalculoIRRF = baseDeCalculoIRRF;
     }
 
     public Integer getFilhosPlanAssiste() {

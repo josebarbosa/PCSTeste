@@ -30,7 +30,7 @@ public class ConectaMySQL {
         try{
             Class.forName("com.mysql.jdbc.Driver"); 
             conexao = DriverManager.getConnection
-        ("jdbc:mysql://dbmy0041.whservidor.com/josebarbos_1", "josebarbos_1", "");
+        ("jdbc:mysql://dbmy0041.whservidor.com/josebarbos_1", "josebarbos_", "");
         }catch(SQLException e){
             throw new RuntimeException(e);
         }
