@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import javax.faces.bean.ManagedBean;
+import javax.faces.bean.RequestScoped;
 import javax.faces.view.ViewScoped;
 
 
@@ -64,7 +65,7 @@ public class SalarioBean implements Serializable{
         this.salarioLiquidoValor = 0;
         this.baseDeCalculoIRRF = 0;
         this.baseDeCalculoPSS = 0;
-        this.rubricas = new ArrayList<>();
+        this.rubricas = new ArrayList<Rubrica>();
     }
     //ano para cálculo da tabela
     private Integer ano;
@@ -142,6 +143,7 @@ public class SalarioBean implements Serializable{
     
     private List<Rubrica> rubricas;
     
+    
     //Esta lista conterá todos os valores e depois serão feitos os cálculos com base nas somas
    
     
@@ -188,7 +190,10 @@ public class SalarioBean implements Serializable{
             rubricas.add(vpni);
             
             rubricas.add(calculaAuxilioIndenizacoes());
-            
+            //zera o salário bruto para fazer a conta
+            this.salarioBrutoValor = 0; 
+            this.baseDeCalculoIRRF = 0;
+            this.baseDeCalculoPSS = 0;
             rubricas.add(calculaBrutoValor());
         }
         return rubricas; 
@@ -200,21 +205,23 @@ public class SalarioBean implements Serializable{
         //não entrará nos cálculos de imposto de renda ou previdência para evitar duplicidades
         salarioBruto.setIncideImpostoRenda(false);
         salarioBruto.setIncidePrevidencia(false);
-        salarioBruto.setNomeRubrica("Salário Bruto: ");
+        salarioBruto.setNomeRubrica("Salário Bruto: ");        
         
-       
-        /*
-        Trabalhar aqui para zerar a lista e evitar a bola de neve
-        */
-        for(int x = 0; x < this.rubricas.size(); x++) { 
+        //A função calculaX posiciona para começar na lista de acordo com o ano. Melhorar esta característica futuramente. 
+        for(int x=(calculaX(this.getAno(), this.rubricas.size())); x < this.rubricas.size(); x++) { 
             
             this.salarioBrutoValor = this.salarioBrutoValor + rubricas.get(x).getValor();
             if(rubricas.get(x).isIncideImpostoRenda()) this.baseDeCalculoIRRF = this.baseDeCalculoIRRF + rubricas.get(x).getValor();
             if(rubricas.get(x).isIncidePrevidencia()) this.baseDeCalculoPSS = this.baseDeCalculoPSS + rubricas.get(x).getValor();
-            System.out.println(this.salarioBrutoValor + " PSS e IRRF1 " + this.baseDeCalculoIRRF + " base de PSS " + this.baseDeCalculoPSS);
+
         }
+        System.out.println(this.getAno() + " " +this.salarioBrutoValor + " PSS e IRRF1 " + this.baseDeCalculoIRRF + " base de PSS " + this.baseDeCalculoPSS);
         
-        salarioBruto.setValor(this.salarioBrutoValor);
+        salarioBruto.setValor(arredondar(this.salarioBrutoValor));
+        //zera salário bruto para garantir
+        this.salarioBrutoValor = 0; 
+        this.baseDeCalculoIRRF = 0;
+        this.baseDeCalculoPSS = 0;
         
         return salarioBruto;                
     }
@@ -1054,6 +1061,22 @@ public class SalarioBean implements Serializable{
 
     public void setSalarioLiquidoValor(double salarioLiquidoValor) {
         this.salarioLiquidoValor = salarioLiquidoValor;
+    }
+
+    private int calculaX(Integer ano, Integer tamanhoLista) {
+        
+        switch (ano){
+            case 2012: 
+                return 0;
+            case 2013:
+                return tamanhoLista / 2 + 1;
+            case 2014:
+                return 2 * (tamanhoLista /3 +1);
+            case 2015:
+                return 3 * (tamanhoLista/4 + 1);
+        }
+        return 0; 
+                    
     }
     
     

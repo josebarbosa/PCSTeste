@@ -1,22 +1,3 @@
-
-import javax.faces.bean.ManagedBean;
-import javax.faces.view.ViewScoped;
-
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/**
- *
- * @author josebarbosa
- * 
- * A classe rubrica é aquela em que vai conter uma descrição da verba, seu caráter indenizatório e o valor. 
- * Depois será feita uma soma dos valores para poder ser calculada
- */
-@ManagedBean
-@ViewScoped
 public class Rubrica {
     
     private double valor; 
@@ -30,6 +11,9 @@ public class Rubrica {
         this.incideImpostoRenda = true;
         this.incidePrevidencia = true;
         this.ehCredito = true; 
+        this.anoReferencia = 2012;
+        this.nomeRubrica = "";
+        this.valor = 0.0; 
     }
     
     public Integer getAnoReferencia() {
