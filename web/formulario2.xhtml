@@ -144,23 +144,24 @@
                 <p:selectBooleanButton id="insalubridade" value="#{salarioBean.insalubridade}" offLabel="Não" onLabel="Sim" />
                             
             </h:panelGrid>
-            <h:commandButton value="Calcular" actionListener="#{salarioBean.calculaBruto}" />
+            <h:commandButton value="Calcular" actionListener="#{salarioBean.geraTabela}" />
             
            
+            
             <p:dataTable id="tabelaSalarial" var="linha" value="#{salarioBean.rubricas}"
-                      emptyMessage="Preencha os dados acima e clique em 'Calcular'" >
-                <p:subTable value="#{linha.anoReferencia}">
-                    <f:facet name="header">
-                        <h:outputText value="#{linha.anoReferencia}" />
-                    </f:facet>
-                    <p:column headerText="Rubrica">
-                        <h:outputText value="#{linha.nomeRubrica}" />
-                    </p:column>
+                      emptyMessage="Preencha os dados acima e clique em 'Calcular'" 
+                      rendered="#{salarioBean.rubricas.size() !=0}">
+               
+                <p:column headerText="Ano">
+                    <h:outputText value="#{linha.anoReferencia}" />
+                </p:column>
+                <p:column headerText="Rubrica">
+                    <h:outputText value="#{linha.nomeRubrica}" />
+                </p:column>
 
-                    <p:column headerText="Valor">
-                        <h:outputText value="#{linha.valor}" />
-                    </p:column>
-                </p:subTable>
+                <p:column headerText="Valor">
+                    <h:outputText value="#{linha.valor}" />
+                </p:column>
                 
                 
             </p:dataTable>

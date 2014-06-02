@@ -25,7 +25,7 @@ import javax.faces.view.ViewScoped;
  *
  * @author josebarbosa
  */
-@ManagedBean(name="salarioBean")
+@ManagedBean
 @ViewScoped
 public class SalarioBean implements Serializable{
     
@@ -36,7 +36,150 @@ public class SalarioBean implements Serializable{
     private Integer orgao;
     private List<SelectItem> orgaos;
     
-     
+    /*
+    Classe SubLista será uma gambiarra para facilitar a implementação do subtable.
+    Nela haverá um ano que será um identificador, e uma lista de subrubricas a serem apresentadas. 
+    */
+    public class Rubrica implements Serializable{
+    
+        private double valor; 
+        private Integer anoReferencia; 
+        private String nomeRubrica; 
+        private boolean incideImpostoRenda;
+        private boolean incidePrevidencia;
+        private boolean ehCredito; 
+
+        public Rubrica(){
+            this.incideImpostoRenda = true;
+            this.incidePrevidencia = true;
+            this.ehCredito = true; 
+            this.anoReferencia = 2012;
+            this.nomeRubrica = "";
+            this.valor = 0.0; 
+        }
+    
+        public Integer getAnoReferencia() {
+            return anoReferencia;
+        }
+
+        public void setAnoReferencia(Integer anoReferencia) {
+            this.anoReferencia = anoReferencia;
+        }
+
+        public Rubrica(double valor, Integer anoReferencia, String nomeRubrica, boolean incideImpostoRenda, boolean incidePrevidencia, boolean ehCredito) {
+            this.valor = valor;
+            this.anoReferencia = anoReferencia;
+            this.nomeRubrica = nomeRubrica;
+            this.incideImpostoRenda = incideImpostoRenda;
+            this.incidePrevidencia = incidePrevidencia;
+            this.ehCredito = ehCredito;
+        }
+    
+        public double getValor() {
+            return valor;
+        }
+
+        public void setValor(double valor) {
+            this.valor = valor;
+        }
+
+        public String getNomeRubrica() {
+            return nomeRubrica;
+        }
+
+        public void setNomeRubrica(String nomeRubrica) {
+            this.nomeRubrica = nomeRubrica;
+        }
+
+        public boolean isIncideImpostoRenda() {
+            return incideImpostoRenda;
+        }
+
+        public void setIncideImpostoRenda(boolean incideImpostoRenda) {
+            this.incideImpostoRenda = incideImpostoRenda;
+        }
+
+        public boolean isIncidePrevidencia() {
+            return incidePrevidencia;
+        }
+
+        public void setIncidePrevidencia(boolean incidePrevidencia) {
+            this.incidePrevidencia = incidePrevidencia;
+        }
+
+        public boolean isEhCredito() {
+            return ehCredito;
+        }
+
+        public void setEhCredito(boolean ehCredito) {
+            this.ehCredito = ehCredito;
+        }
+
+
+
+    }
+    public class SubLista implements Serializable{
+        private Integer anoLista;
+        private double salarioBruto;
+        private double descontos;
+        private double salarioLiquido; 
+        private List<Rubrica> sublistaRubricas = new ArrayList<Rubrica>(); ; 
+        
+        
+        public SubLista(){
+            
+        }
+
+        public SubLista(Integer anoLIsta, List<Rubrica> sublistaRubricas) {
+            this.anoLista = anoLista;
+            this.salarioBruto = 0;
+            this.salarioLiquido = 0;
+            this.descontos = 0;
+        }
+
+        public double getSalarioBruto() {
+            return salarioBruto;
+        }
+
+        public void setSalarioBruto(double salarioBruto) {
+            this.salarioBruto = salarioBruto;
+        }
+
+        public double getDescontos() {
+            return descontos;
+        }
+
+        public void setDescontos(double descontos) {
+            this.descontos = descontos;
+        }
+
+        public double getSalarioLiquido() {
+            return salarioLiquido;
+        }
+
+        public void setSalarioLiquido(double salarioLiquido) {
+            this.salarioLiquido = salarioLiquido;
+        }
+
+        public Integer getAnoLista() {
+            return anoLista;
+        }
+
+        public void setAnoLista(Integer anoLista) {
+            this.anoLista = anoLista;
+        }
+       
+
+        public List<Rubrica> getSublistaRubricas() {
+            return sublistaRubricas;
+        }
+
+        public void setSublistaRubricas(List<Rubrica> sublistaRubricas) {
+            this.sublistaRubricas = sublistaRubricas;
+        }
+        
+        
+    } 
     /*
     Construtor
         */
@@ -65,7 +208,8 @@ public class SalarioBean implements Serializable{
         this.salarioLiquidoValor = 0;
         this.baseDeCalculoIRRF = 0;
         this.baseDeCalculoPSS = 0;
-        this.rubricas = new ArrayList<Rubrica>();
+        this.rubricas = new ArrayList<>();
+        this.sublistas = new ArrayList<>();
     }
     //ano para cálculo da tabela
     private Integer ano;
@@ -98,6 +242,7 @@ public class SalarioBean implements Serializable{
     private boolean insalubridade; 
     private double previdenciaAliquota;
     private List<SelectItem> previdenciaAliquotas; 
+
     
     //valores fixos
     private double gampu;
@@ -136,12 +281,14 @@ public class SalarioBean implements Serializable{
     private double salarioBrutoValor;
     private double baseDeCalculoPSS;
     private double baseDeCalculoIRRF; 
+    private double salarioBrutoFinal; 
     private double outrosDescontosValor;
     private double impostoDeRendaValor;
     private double descontosTotalValor;
     private double salarioLiquidoValor; 
     
     private List<Rubrica> rubricas;
+    List<SubLista> sublistas;
     
     
     //Esta lista conterá todos os valores e depois serão feitos os cálculos com base nas somas
@@ -150,6 +297,31 @@ public class SalarioBean implements Serializable{
     /*
     Método para adicionar todas as rubricas numa lista e depois serem retornadas. 
     */
+    public void geraTabela() throws SQLException, ClassNotFoundException{
+        sublistas = new ArrayList<>();
+        SubLista sublista = new SubLista();
+        int anoInserir = 2012;
+        //chama calcula Bruto para trazer todas as referências salariais
+        calculaBruto(); 
+        //Agora quebra a lista, para organizá-la de acordo com o ano
+        /*for(int x=0; x < 4; x++){
+            List<Rubrica> subListaTemp = new ArrayList<>(); 
+            for(int y = 0; y < rubricas.size(); y++){
+                if((x + anoInserir)==rubricas.get(y).getAnoReferencia()) {
+                    subListaTemp.add(rubricas.get(y));
+                }
+            }
+            System.out.println("Passou aqui!!!!!!! " +(x + anoInserir) );
+            sublista.setAnoLista(x + anoInserir);
+            sublista.setSublistaRubricas(subListaTemp);
+            
+            
+            sublistas.add(sublista);
+            
+        }
+        return sublistas; */
+    }
+    
     public List<Rubrica> calculaBruto() throws SQLException, ClassNotFoundException{
         //escrever aqui um método que vai adicionando cada verba ao salário.
         //gerar uma linha para cada  verba
@@ -192,11 +364,140 @@ public class SalarioBean implements Serializable{
             rubricas.add(calculaAuxilioIndenizacoes());
             //zera o salário bruto para fazer a conta
             this.salarioBrutoValor = 0; 
+            this.salarioBrutoFinal = 0;
             this.baseDeCalculoIRRF = 0;
             this.baseDeCalculoPSS = 0;
             rubricas.add(calculaBrutoValor());
+            rubricas.add(calculaPSS());
+            
+            Rubrica irrf = new Rubrica();
+            irrf.setNomeRubrica("IRRF - Imposto de Renda Retido na Fonte");
+            irrf.setAnoReferencia(this.getAno());
+            irrf.setIncideImpostoRenda(false);
+            irrf.setIncidePrevidencia(false);
+            irrf.setValor(arredondar(calculaIRRF(this.getBaseDeCalculoIRRF(), this.getDependentesIRRF())));
+            rubricas.add(irrf);
+            
+            Rubrica salarioLiquido = new Rubrica();
+            salarioLiquido.setNomeRubrica("Salário Líquido");
+            salarioLiquido.setAnoReferencia(this.getAno());
+            salarioLiquido.setIncideImpostoRenda(false);
+            salarioLiquido.setIncidePrevidencia(false);
+            salarioLiquido.setValor(arredondar(this.getSalarioBrutoFinal() - this.getPrevidenciaValor() - this.getIRRF()));            
+            rubricas.add(salarioLiquido);
+            
         }
         return rubricas; 
+    }
+    public double calculaIRRF(double base, Integer dependentes){
+        double resposta = 0.0;
+        if(dependentes > 0){
+            switch(ano){
+                case 2012:
+                    base = base - dependentes * 164.56;
+                    break;
+                case 2013:
+                    base = base - dependentes * 171.97;
+                    break;
+                case 2014:
+                    base = base - dependentes * 179.71;
+                    break;
+                case 2015:
+                    base = base - dependentes * 187.80;
+                    break;
+            }
+        }
+        base = base - this.getPrevidenciaValor();
+        resposta = calculaImpostodeRenda(this.getAno(), base);
+        
+        //Deduz dependentes do Imposto de Renda
+        arredondar(resposta);
+        this.setIRRF(resposta);
+        return resposta;         
+    }
+    
+    public double calculaImpostodeRenda(Integer ano, double base){
+        double resposta = 0.0;
+        switch(ano){
+            case 2012:
+                if(base <1637.12) return 0;
+                if(base >= 1637.12 && base <= 2453.50) return (base * 0.075 - 122.78);
+                if(base >= 2453.51 && base <= 3271.38) return (base * 0.150 - 306.80);
+                if(base >= 3271.39 && base <= 4087.65) return (base * 0.225 - 552.15);
+                if(base >4087.66) return (base * 0.275 - 756.53);
+            case 2013:
+                if(base <1710.78) return 0;
+                if(base >= 1710.79 && base <= 2563.91) return (base * 0.075 - 128.31);
+                if(base >= 2563.92 && base <= 3418.59) return (base * 0.150 - 320.60);
+                if(base >= 3418.60 && base <= 4271.59) return (base * 0.225 - 577.00);
+                if(base >4271.59) return (base * 0.275 - 790.58);
+            case 2014:
+                if(base <1787.77) return 0;
+                if(base >= 1787.78 && base <= 2679.29) return (base * 0.075 - 134.08);
+                if(base >= 2679.30 && base <= 3572.43) return (base * 0.150 - 335.03);
+                if(base >= 3572.44 && base <= 4463.81) return (base * 0.225 - 602.96);
+                if(base >4463.81) return (base * 0.275 - 826.15);
+            case 2015:
+                if(base <1868.22) return 0;
+                if(base >= 1868.23 && base <= 2799.86) return (base * 0.075 - 140.12);
+                if(base >= 2799.87 && base <= 3733.19) return (base * 0.150 - 350.11);
+                if(base >= 3733.20 && base <= 4664.68) return (base * 0.225 - 630.10);
+                if(base >4464.68) return (base * 0.275 - 863.33);
+                 
+        }
+        return resposta; 
+    }
+    
+    public Rubrica calculaPSS(){
+        Rubrica pss = new Rubrica();
+        pss.setAnoReferencia(this.getAno());
+        pss.setEhCredito(false);
+        pss.setIncideImpostoRenda(false);
+        pss.setIncidePrevidencia(false);
+        Double teto = 0.0;
+        Double aliquota = this.getPrevidenciaAliquota();
+        
+        
+        switch(this.getAno()){
+                case 2012:
+                    teto = 3916.20;
+                    break;
+                case 2013:
+                    teto = 4159.0;
+                    break;
+                    //Não existe teto definido para 2015. Quando for estipulado, o programa deverá ser atualizado
+                default:
+                    teto = 4390.24;
+                    break;    
+        }
+        this.baseDeCalculoPSS = 0;
+        this.baseDeCalculoIRRF = 0;
+        for(int x=(calculaX(this.getAno(), this.rubricas.size())); x < this.rubricas.size(); x++) { 
+            if(rubricas.get(x).isIncidePrevidencia()) this.baseDeCalculoPSS = this.baseDeCalculoPSS + rubricas.get(x).getValor();
+            System.out.println("Ano: " + this.getAno() + " base PSS " + this.baseDeCalculoPSS);
+            if(rubricas.get(x).isIncideImpostoRenda()) this.baseDeCalculoIRRF = this.baseDeCalculoIRRF + rubricas.get(x).getValor();
+            
+        }
+       
+        this.setPrevidenciaValor(arredondar((teto * 0.11)+(((this.getBaseDeCalculoPSS()-teto)*aliquota/100))));
+        
+        /*
+        Alíquotas passadas no formulário
+        0: Considera apenas teto do regime geral
+        7: Equivale a 7,5% de contribuição
+        8: Equivale a 8% de contribuição
+        8,5%: Equivale a 8,5% de contribuição
+        11: contribuição integral
+        */
+        pss.setNomeRubrica("Previdência");
+        pss.setValor(this.getPrevidenciaValor());
+        this.setPss(this.getPrevidenciaValor());
+        /*
+        Aproveita as variáveis para já definir a base de cálculo da previdência para 
+        */
+        
+        return pss; 
+        
     }
     
     public Rubrica calculaBrutoValor(){
@@ -205,7 +506,8 @@ public class SalarioBean implements Serializable{
         //não entrará nos cálculos de imposto de renda ou previdência para evitar duplicidades
         salarioBruto.setIncideImpostoRenda(false);
         salarioBruto.setIncidePrevidencia(false);
-        salarioBruto.setNomeRubrica("Salário Bruto: ");        
+        salarioBruto.setNomeRubrica("Salário Bruto: ");    
+        this.salarioBrutoValor = 0;
         
         //A função calculaX posiciona para começar na lista de acordo com o ano. Melhorar esta característica futuramente. 
         for(int x=(calculaX(this.getAno(), this.rubricas.size())); x < this.rubricas.size(); x++) { 
@@ -215,13 +517,13 @@ public class SalarioBean implements Serializable{
             if(rubricas.get(x).isIncidePrevidencia()) this.baseDeCalculoPSS = this.baseDeCalculoPSS + rubricas.get(x).getValor();
 
         }
-        System.out.println(this.getAno() + " " +this.salarioBrutoValor + " PSS e IRRF1 " + this.baseDeCalculoIRRF + " base de PSS " + this.baseDeCalculoPSS);
-        
         salarioBruto.setValor(arredondar(this.salarioBrutoValor));
+        this.setSalarioBrutoFinal(0.0);
+        this.setSalarioBrutoFinal(this.salarioBrutoValor);
+        
         //zera salário bruto para garantir
         this.salarioBrutoValor = 0; 
-        this.baseDeCalculoIRRF = 0;
-        this.baseDeCalculoPSS = 0;
+        
         
         return salarioBruto;                
     }
@@ -528,6 +830,14 @@ public class SalarioBean implements Serializable{
         return treinamentos;
     }
 
+    public double getSalarioBrutoFinal() {
+        return salarioBrutoFinal;
+    }
+
+    public void setSalarioBrutoFinal(double salarioBrutoFinal) {
+        this.salarioBrutoFinal = salarioBrutoFinal;
+    }
+
     public void setTreinamentos(List<SelectItem> treinamentos) {
         this.treinamentos = treinamentos;
     }
@@ -620,6 +930,14 @@ public class SalarioBean implements Serializable{
 
     public void setOptaPlanAssiste(boolean optaPlanAssiste) {
         this.optaPlanAssiste = optaPlanAssiste;
+    }
+    
+    public List<SubLista> getSublistas() {
+        return sublistas;
+    }
+
+    public void setSublistas(List<SubLista> sublistas) {
+        this.sublistas = sublistas;
     }
 
     public boolean isConjugePlanAssiste() {
@@ -1064,14 +1382,14 @@ public class SalarioBean implements Serializable{
     }
 
     private int calculaX(Integer ano, Integer tamanhoLista) {
-        
+        //Problema: a lista cresce em 4 a partir de 2013. 
         switch (ano){
             case 2012: 
                 return 0;
             case 2013:
-                return tamanhoLista / 2 + 1;
+                return tamanhoLista / 2 + 2;
             case 2014:
-                return 2 * (tamanhoLista /3 +1);
+                return ( 2 * (tamanhoLista /3 + 1));
             case 2015:
                 return 3 * (tamanhoLista/4 + 1);
         }
