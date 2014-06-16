@@ -1,14 +1,43 @@
-<?xml version='1.0' encoding='UTF-8' ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<?xml version="1.0" encoding="UTF-8"?>
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:h="http://xmlns.jcp.org/jsf/html">
+xmlns:h="http://java.sun.com/jsf/html"
+xmlns:f="http://java.sun.com/jsf/core"
+xmlns:p="http://primefaces.org/ui">
     <h:head>
-        <title>Facelet Title</title>
+        <title>Simulação de Salários - MPU</title>
     </h:head>
     <h:body>
-        Hello from Facelets
+        <h1>Página de Simulação de Salários - MPU</h1>
         <br />
-        <h:link outcome="welcomePrimefaces" value="Página de boas-vindas do Primefaces" />
+        <p>Seja bem vindo à nova página de simulação de salários do MPU.
+        Para iniciar o cálculo, escolha abaixo o seu cargo e classe na
+        carreira. </p>
+        
+        <p:ajaxStatus onstart="statusDialog.show();" oncomplete="statusDialog.hide();"/>  
+
+        <p:dialog modal="true" widgetVar="statusDialog" header="Loading"   
+                  draggable="false" closable="false">  
+            <h:outputText value="Processando..." />
+        </p:dialog>
+        <h:form id="formindex">
+            <h:panelGrid columns="2">
+                <h:outputText value="Escolha o plano que deseja simular:" />
+                <p:selectOneMenu id="plano" value="#{folhaBean.plano}">
+                    <f:selectItems value="#{folhaBean.buscaPlanos()}" var="planos" itemLabel="#{planos.descricao}" itemValue="#{planos.valor}" />
+                    <p:ajax update="padrao" process="@this" />
+                </p:selectOneMenu>
+                <h:outputText value="Qual é o cargo que ocupa?" />
+                <p:selectOneMenu id="cargo" value="#{folhaBean.cargo}">
+                    <f:selectItem itemLabel="Técnico" itemValue="2" />
+                    <f:selectItem itemLabel="Analista" itemValue="3" />
+                </p:selectOneMenu>
+                <h:outputText value="Qual sua posição (padrão) na carreira?" />
+                <p:selectOneMenu id="padrao" value="#{folhaBean.padrao}">
+                    <f:selectItems value="#{folhaBean.buscaPadroes()}" var="padroes" itemLabel="#{padroes.descricao}" itemValue="#{padroes.valor}" />
+                </p:selectOneMenu>
+            </h:panelGrid>
+            
+            <h:commandButton value="Prosseguir" action="welcomePrimefaces"/>
+        </h:form>
     </h:body>
 </html>
-
