@@ -15,9 +15,9 @@ xmlns:p="http://primefaces.org/ui">
         
         <p:ajaxStatus onstart="statusDialog.show();" oncomplete="statusDialog.hide();"/>  
 
-        <p:dialog modal="true" widgetVar="statusDialog" header="Loading"   
+        <p:dialog modal="true" widgetVar="statusDialog" header="Processando"   
                   draggable="false" closable="false">  
-            <h:outputText value="Processando..." />
+            <h:outputText value="Calculando número de níveis do plano escolhido..." />
         </p:dialog>
         <h:form id="formindex">
             <h:panelGrid columns="2">
@@ -37,7 +37,7 @@ xmlns:p="http://primefaces.org/ui">
                 </p:selectOneMenu>
             </h:panelGrid>
             
-            <h:commandButton value="Prosseguir" action="welcomePrimefaces"/>
+            <h:commandButton value="Prosseguir" action="#{folhaBean.segundaPagina()}"/>
         </h:form>
     </h:body>
 </html>

@@ -55,6 +55,11 @@ public class FolhaBean implements Serializable{
     private Integer escolaridade;
     private Integer treinamento;
     private Integer funcao;
+    private Integer auxilioCrecheDependentes;
+    private Integer impostoDeRendaDependentes; 
+    private Integer planAssisteFilhosDependentes;
+    private Integer anuenioAliquota;
+    
     
     private double funcaoValor;
     private double treinamentoValor;
@@ -63,6 +68,11 @@ public class FolhaBean implements Serializable{
     private double gasValor;
     private double projetoValor;
     private double penosidadeValor; 
+    private double anuenioValor; 
+    private double planAssisteValor;
+    private double auxilioAlimentacaoValor;
+    private double auxilioCrecheValor; 
+    private double vpniValor; 
     private double salarioBrutoValor;
     private double descontosValor;
     private double salarioLiquidoValor;
@@ -70,7 +80,8 @@ public class FolhaBean implements Serializable{
     private double baseIRRFValor;
     private double pssAliquota;
     private double irrfAliquota; 
-    
+    private double pssValor;
+    private double irrfValor;
     
     private boolean possuiFuncao;
     private boolean possuiGas;
@@ -79,7 +90,9 @@ public class FolhaBean implements Serializable{
     private boolean possuiPlanAssiste; 
     
     
-    
+    public void atualizaContraCheque(){
+        calculaVencimentoBasico();
+    }
     
     
     public FolhaBean(){
@@ -92,6 +105,95 @@ public class FolhaBean implements Serializable{
         this.pssAliquota = 11;
     }
 
+    public Integer getAnuenioAliquota() {
+        return anuenioAliquota;
+    }
+
+    public void setAnuenioAliquota(Integer anuenioAliquota) {
+        this.anuenioAliquota = anuenioAliquota;
+    }
+
+    public double getAnuenioValor() {
+        return anuenioValor;
+    }
+
+    public void setAnuenioValor(double anuenioValor) {
+        this.anuenioValor = anuenioValor;
+    }
+
+    public Integer getImpostoDeRendaDependentes() {
+        return impostoDeRendaDependentes;
+    }
+
+    public void setImpostoDeRendaDependentes(Integer impostoDeRendaDependentes) {
+        this.impostoDeRendaDependentes = impostoDeRendaDependentes;
+    }
+
+    public double getPssValor() {
+        return pssValor;
+    }
+
+    public void setPssValor(double pssValor) {
+        this.pssValor = pssValor;
+    }
+
+    public double getIrrfValor() {
+        return irrfValor;
+    }
+
+    public void setIrrfValor(double irrfValor) {
+        this.irrfValor = irrfValor;
+    }
+    
+
+    public Integer getAuxilioCrecheDependentes() {
+        return auxilioCrecheDependentes;
+    }
+
+    public void setAuxilioCrecheDependentes(Integer auxilioCrecheDependentes) {
+        this.auxilioCrecheDependentes = auxilioCrecheDependentes;
+    }
+
+    public Integer getPlanAssisteFilhosDependentes() {
+        return planAssisteFilhosDependentes;
+    }
+
+    public void setPlanAssisteFilhosDependentes(Integer planAssisteFilhosDependentes) {
+        this.planAssisteFilhosDependentes = planAssisteFilhosDependentes;
+    }
+
+    public double getPlanAssisteValor() {
+        return planAssisteValor;
+    }
+
+    public void setPlanAssisteValor(double planAssisteValor) {
+        this.planAssisteValor = planAssisteValor;
+    }
+
+    public double getAuxilioAlimentacaoValor() {
+        return auxilioAlimentacaoValor;
+    }
+
+    public void setAuxilioAlimentacaoValor(double auxilioAlimentacaoValor) {
+        this.auxilioAlimentacaoValor = auxilioAlimentacaoValor;
+    }
+
+    public double getAuxilioCrecheValor() {
+        return auxilioCrecheValor;
+    }
+
+    public void setAuxilioCrecheValor(double auxilioCrecheValor) {
+        this.auxilioCrecheValor = auxilioCrecheValor;
+    }
+
+    public double getVpniValor() {
+        return vpniValor;
+    }
+
+    public void setVpniValor(double vpniValor) {
+        this.vpniValor = vpniValor;
+    }
+    
     public List<Rubrica> getRubricas() {
         return rubricas;
     }
@@ -454,6 +556,31 @@ public class FolhaBean implements Serializable{
         aliquotas.add(item);
         
         return aliquotas; 
+    }
+    
+    public List<SelectItem> buscarAnuenios(){
+        List<SelectItem> anuenios = new ArrayList<>();
+        SelectItem item;
+        for(int x=0; x <= 35; x++){            
+            item = new SelectItem(Integer.toString(x)+"%", x);
+            anuenios.add(item);
+        }
+        return anuenios;
+    }
+
+    private void calculaVencimentoBasico() {
+        //Busca o valor do vencimento no banco de dados
+        //apenas para teste
+        System.out.println("Passou pelo cálculo do vencimento básico!!!");
+        
+        //setar o valor da variável VencimentoBásico valor no banco de dados. 
+    }
+    
+    public String segundaPagina(){
+        
+        atualizaContraCheque();
+        
+        return "welcomePrimefaces";
     }
     
 }

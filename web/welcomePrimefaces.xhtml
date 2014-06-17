@@ -21,23 +21,14 @@
                 <p:layoutUnit position="west" size="500" >
                     <p:ajaxStatus onstart="statusDialog.show();" oncomplete="statusDialog.hide();"/>  
 
-                    <p:dialog modal="true" widgetVar="statusDialog" header="Loading"   
+                    <p:dialog modal="true" widgetVar="statusDialog" header="Processando Dados"   
                               draggable="false" closable="false">  
-                        <h:outputText value="Processando..." />
+                        <h:outputText value="Aguarde..." />
                     </p:dialog>
                     <h:form id="form2">
                         <p:growl id="growl" showDetail="true" />  
                         <h:panelGrid columns="2">
-                            <h:outputText value="Qual a sua escolaridade?" />
-                            <p:selectOneMenu id="escolaridade" value="#{folhaBean.escolaridade}">
-                                <f:selectItems id="escolaridades" value="#{folhaBean.buscaEscolaridades()}" 
-                                               var="escolaridade" itemLabel="#{escolaridade.descricao}" itemValue="#{escolaridade.valor}" />
-                            </p:selectOneMenu>
-                            <h:outputText value="Possui quantas horas de treinamentos?" />
-                            <p:selectOneMenu id="treinamento" value="#{folhaBean.treinamento}">
-                                <f:selectItems id="treinamentos" value="#{folhaBean.buscaTreinamentos()}" 
-                                               var="treinamento" itemLabel="#{treinamento.descricao}" itemValue="#{treinamento.valor}" />
-                            </p:selectOneMenu>
+                            
                             <h:outputText value="Possui função comissionada?"/>
                             <p:selectBooleanButton offLabel="Não" onLabel="Sim" id="possuifuncao" value="#{folhaBean.possuiFuncao}">
                                 <p:ajax update="form2" process="@this" />
@@ -62,6 +53,18 @@
                                            Normalmente é atribuída a servidores com especialidades de segurança e transporte." />
                             </p:selectBooleanButton>
                             
+                            <h:outputText value="Qual a sua escolaridade?" />
+                            <p:selectOneMenu id="escolaridade" value="#{folhaBean.escolaridade}">
+                                <f:selectItems id="escolaridades" value="#{folhaBean.buscaEscolaridades()}" 
+                                               var="escolaridade" itemLabel="#{escolaridade.descricao}" itemValue="#{escolaridade.valor}" />
+                            </p:selectOneMenu>
+                            <h:outputText value="Possui quantas horas de treinamentos?" />
+                            <p:selectOneMenu id="treinamento" value="#{folhaBean.treinamento}">
+                                <f:selectItems id="treinamentos" value="#{folhaBean.buscaTreinamentos()}" 
+                                               var="treinamento" itemLabel="#{treinamento.descricao}" itemValue="#{treinamento.valor}" />
+                            </p:selectOneMenu>
+                            
+                            
                             <h:outputText value="Possui Penosidade?" />
                             <p:selectBooleanButton offLabel="Não" id="possuipenosidade" onLabel="Sim" value="#{folhaBean.possuiPenosidade}" />
                             
@@ -82,7 +85,80 @@
                                                Nos demais casos, escolha funpresp, e a alíquota com que contribui, se for optante, ou funpresp-não optante,
                                                para o caso de contribuir apenas até o teto do regime geral. " />
                             </p:selectOneMenu>
+                           
+                           <h:outputLabel value="Dependentes - Imposto de Renda:"  />
+                           <p:selectOneMenu value="#{folhaBean.impostoDeRendaDependentes}" id="dependentesImpostodeRenda" >
+                               <f:selectItem itemLabel="0" itemValue="0" />
+                               <f:selectItem itemLabel="1" itemValue="1" />
+                               <f:selectItem itemLabel="2" itemValue="2" />
+                               <f:selectItem itemLabel="3" itemValue="3" />
+                               <f:selectItem itemLabel="4" itemValue="4" />
+                               <f:selectItem itemLabel="5" itemValue="5" />
+                               <f:selectItem itemLabel="6" itemValue="6" />
+                               <f:selectItem itemLabel="7" itemValue="7" />
+                            </p:selectOneMenu> 
+                           
+                           <h:outputLabel value="Dependentes - Auxílio Creche:"  />
+                           <p:selectOneMenu value="#{folhaBean.auxilioCrecheDependentes}" id="dependentesAuxilioCreche" >
+                               <f:selectItem itemValue="0" itemLabel="0" />
+                               <f:selectItem itemValue="1" itemLabel="1" />
+                               <f:selectItem itemValue="2" itemLabel="2" />
+                               <f:selectItem itemValue="3" itemLabel="3" />
+                               <f:selectItem itemValue="4" itemLabel="4" />
+                            </p:selectOneMenu>
+
+                            <h:outputLabel value="VPNI:" for="vpni" />
+                            <h:inputText id="vpni" value="#{folhaBean.vpniValor}"  >
+                                <f:convertNumber minFractionDigits="2" maxFractionDigits="2" minIntegerDigits="1" maxIntegerDigits="5" 
+                                                 currencySymbol="R$" type="currency"/>
+                            </h:inputText>
                             
+                            <h:outputText value="Possui anuênios ou quinquênios?" />
+                            <p:selectOneMenu id="aliquotaANuenio" value="#{folhaBean.anuenioAliquota}">
+                                <f:selectItems value="#{folhaBean.buscarAnuenios()}" id="ListaAnuenios"
+                                   var="aliquotaAnuenio"
+                                   itemLabel="#{aliquotaAnuenio.descricao}"
+                                   itemValue="#{aliquotaAnuenio.valor}" />
+                            </p:selectOneMenu>
+                            
+                            
+                        </h:panelGrid>
+                        <p:commandButton value="Calcular" action="#{folhaBean.atualizaContraCheque()}" />
+                    </h:form>
+                </p:layoutUnit>
+
+                <p:layoutUnit position="center">
+                    <h3>Resultado da Simulação</h3>
+                    Abaixo, você já pode visualizar uma prévia do salário "mínimo" de um servidor do MPU pelas informações previamente prestadas. 
+                    <br />
+                    Para maiores detalhes, preencha agora detalhes sobre funções, escolaridade, treinamentos e gratificações. 
+                    <p:dataTable id="creditosLista" var="creditos" value="#{folhaBean.creditos}">
+                        <f:facet name="header">
+                            Créditos
+                        </f:facet>
+                        <p:column>
+                            <h:outputText value="#{creditos.nome}" />
+                        </p:column>
+                        <p:column>
+                            <h:outputText value="#{creditos.valor}" />
+                        </p:column>
+                    </p:dataTable>
+                    
+                    <p:dataTable id="debitosLista" var="debitos" value="#{folhaBean.debitos}">
+                        <f:facet name="header">
+                            Débitos
+                        </f:facet>
+                        <p:column>
+                            <h:outputText value="#{debitos.nome}" />
+                        </p:column>
+                        <p:column>
+                            <h:outputText value="#{debitos.valor}" />
+                        </p:column>
+                    </p:dataTable>
+                </p:layoutUnit>
+ 
+                            <!--
+                            Implementar posteriormente, apresentou falhas quando renderiza o ajax
                             <h:outputLabel value="Possui Plan-Assiste?" for="titularPlanAssiste" />
                             <p:selectBooleanButton id="titularPlanAssiste" value="#{folhaBean.possuiPlanAssiste}" offLabel="Não" onLabel="Sim" >
                                 <f:ajax render="conjugePlanAssiste" execute="@this"/>
@@ -90,28 +166,17 @@
 
                             <h:outputLabel value="Plan-Assiste (Cônjuge):" for="conjugePlanAssiste" rendered="#{folhaBean.possuiPlanAssiste}"/>
                             <p:selectBooleanButton id="conjugePlanAssiste" value="#{salarioBean.conjugePlanAssiste}" offLabel="Não" onLabel="Sim"  rendered="#{folhaBean.possuiPlanAssiste}"/>
+                            -->
+                            <!--
+                            Implementar posteriormente, apresentou falhas quando renderiza o ajax
+                            <h:outputLabel value="Possui Plan-Assiste?" for="titularPlanAssiste" />
+                            <p:selectBooleanButton id="titularPlanAssiste" value="#{folhaBean.possuiPlanAssiste}" offLabel="Não" onLabel="Sim" >
+                                <f:ajax render="conjugePlanAssiste" execute="@this"/>
+                            </p:selectBooleanButton>
 
-                            
-                           <h:outputLabel value="Dependentes - Auxílio Creche:"  />
-                           <h:selectOneMenu value="#{salarioBean.dependentesAuxilioCreche}" id="dependentesAuxilioCreche" >
-                                <f:selectItems value="#{salarioBean.dependentesAuxilioCreches}" id="dependentesAuxilioCreches"
-                                               var="item"
-                                               itemLabel="#{item.descricao}"
-                                               itemValue="#{item.valor}" />
-                            </h:selectOneMenu>
-
-                            <h:outputLabel value="VPNI:" for="vpni" />
-                            <h:inputText id="vpni" value="#{salarioBean.vpni}"  />
-                            
-                            
-                        </h:panelGrid>
-                    </h:form>
-                </p:layoutUnit>
-
-                <p:layoutUnit position="center">
-                    Colocar aqui o código com a listagem do contracheque.
-                </p:layoutUnit>
-
+                            <h:outputLabel value="Plan-Assiste (Cônjuge):" for="conjugePlanAssiste" rendered="#{folhaBean.possuiPlanAssiste}"/>
+                            <p:selectBooleanButton id="conjugePlanAssiste" value="#{salarioBean.conjugePlanAssiste}" offLabel="Não" onLabel="Sim"  rendered="#{folhaBean.possuiPlanAssiste}"/>
+                            -->
             </p:layout>
 
         </h:body>
