@@ -23,7 +23,12 @@ import java.util.concurrent.Executor;
 import javax.faces.bean.ManagedBean;
 import javax.faces.view.ViewScoped;
 import br.com.josebarbosa.conexao.ConectaMySQL;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.ResultSet;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.Locale;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
@@ -59,7 +64,7 @@ public class FolhaBean implements Serializable{
     private Integer impostoDeRendaDependentes; 
     private Integer planAssisteFilhosDependentes;
     private Integer anuenioAliquota;
-    
+    private Integer anoTabela; 
     
     private double funcaoValor;
     private double treinamentoValor;
@@ -89,11 +94,133 @@ public class FolhaBean implements Serializable{
     private boolean possuiPenosidade;
     private boolean possuiPlanAssiste; 
     
-    
-    public void atualizaContraCheque(){
-        calculaVencimentoBasico();
+    private Rubrica rubrica; 
+
+    public Rubrica getRubrica() {
+        return rubrica;
+    }
+
+    public void setRubrica(Rubrica rubrica) {
+        this.rubrica = rubrica;
     }
     
+    
+    public void atualizaContraCheque() throws ClassNotFoundException, SQLException{
+        creditos = new ArrayList<>();
+        debitos = new ArrayList<>();
+        calculaVencimentoBasico();
+        rubrica = new Rubrica("Vencimento Básico", this.getVencimentoBasicoValor(), true, true, true);
+        creditos.add(rubrica);
+        //Adiciona a gaj, conforme o ano
+        rubrica = new Rubrica("GAJ", calculaGAJ(this.getAnoTabela()), true, true, true);
+        creditos.add(rubrica);
+        //Adiciona a VPI de R$ 59,87
+        rubrica = new Rubrica("VPI - Lei 10.698/2003", 59.87, true, true, true);
+        creditos.add(rubrica);
+        
+        if(this.isPossuiFuncao()){
+            rubrica = new Rubrica("Função/Cargo em Comissão", calculaFuncao(), false, true, true);
+            creditos.add(rubrica);
+        }
+        
+        if(this.isPossuiGas()){
+            rubrica = new Rubrica("Gratificação de Atividade de Segurança", 
+                    arredondar(this.getVencimentoBasicoValor() * 0.35), true, true, true);
+            creditos.add(rubrica);
+        }
+        
+        if(this.vpniValor != 0.0){
+            rubrica = new Rubrica("VPNI - Vantagem Pessoal Nominalmente Identificável", 
+                    this.getVpniValor(), true, true, true);
+            /*
+            Caso o usuário equivocadamente lance o valor da VPI (R$ 59,87), faz um alerta de
+            que este valor já foi informado
+            */
+            if(this.getVpniValor()==59.87){
+                FacesContext context = FacesContext.getCurrentInstance();
+                context.addMessage(null, new FacesMessage("Aviso", 
+                        "Observe que o valor de R$ 59,87 referente à VPI do reajuste de 2003 já está considerada. Possui também realmente este valor de VPNI?"
+                                + "Caso não possua, deixe em branco. "));
+    
+            }
+            creditos.add(rubrica);
+        }
+        
+        if(this.isPossuiPenosidade()){
+            rubrica = new Rubrica("Adicional de Penosidade", 
+                    arredondar(this.getVencimentoBasicoValor() * 0.20), false, true, true);
+            creditos.add(rubrica);
+        }
+        
+        if(this.anuenioAliquota > 0){
+            rubrica = new Rubrica("Anuênios", 
+                    arredondar(this.getVencimentoBasicoValor() * this.getAnuenioAliquota()/100), true, true, true);
+            creditos.add(rubrica);
+        }
+        
+        //validações de teste
+        System.out.println("Cargo par ateste: " + this.getCargo());
+        System.out.println("Escolaridade par ateste: " + this.getEscolaridade());
+        System.out.println("Treinamento para teste: " + this.getTreinamento());
+        
+        
+        
+        //Calcula adicional de qualificação, se superior ao requisito do cargo:
+        if(this.getCargo() < this.getEscolaridade()){
+            rubrica = new Rubrica("Adicional de Qualificação", calculaQualificacao(), true, true, true);
+            creditos.add(rubrica);
+        }
+        
+        //Calcula adicional de treinamento, se tiver horas
+        if(this.getTreinamento() != 0){
+            rubrica = new Rubrica("Adicional de Treinamento", arredondar(this.getVencimentoBasicoValor() * this.getTreinamento() / 100), true, true, true);
+            creditos.add(rubrica);
+        }
+        
+        //auxilio alimentação
+        rubrica = new Rubrica("Auxílio Alimentação", calculaAuxilioAlimentacao(), false, false, true);
+        creditos.add(rubrica);
+        
+        
+        /*
+        Cálculo dos débitos
+        */
+        //Após calcular todos os créditos, os primeiros cálculos consistem em apurar o salário bruto, e depois as bases de cálculo para PSS e IRRF, nesta ordem
+        //(o valor do PSS interfere na base de cálculo do IRRF)
+        
+        
+    }
+    public double calculaQualificacao(){
+        switch(this.getEscolaridade()){
+            case 3:
+                return arredondar(this.getVencimentoBasicoValor() * 0.05);
+            case 4:
+                return arredondar(this.getVencimentoBasicoValor() * 0.075);
+            case 5:
+                return arredondar(this.getVencimentoBasicoValor() * 0.10);
+            case 6:
+                return arredondar(this.getVencimentoBasicoValor() * 0.125);
+        }
+        return 0; 
+    }
+    public double calculaGAJ(Integer ano){
+        double gaj;
+        switch(ano){
+            case 2013:
+                gaj = 0.62;
+                break;
+            case 2014:
+                gaj = 0.752;
+                break;
+            case 2015:
+                gaj = 0.9;
+                break;
+            default: 
+                gaj = 0.5;
+                break;            
+        }
+        return arredondar(this.getVencimentoBasicoValor() * gaj); 
+    }
     
     public FolhaBean(){
         this.planos = new ArrayList<>();
@@ -103,8 +230,22 @@ public class FolhaBean implements Serializable{
         this.plano = 2;
         this.padrao = 1;
         this.pssAliquota = 11;
+        this.escolaridade = 2;
+        this.anoTabela = Calendar.getInstance().get(Calendar.YEAR);
+        this.treinamento = 0; 
+        this.cargo = 2;
+        
     }
 
+    public Integer getAnoTabela() {
+        return anoTabela;
+    }
+
+    public void setAnoTabela(Integer anoTabela) {
+        this.anoTabela = anoTabela;
+    }
+
+    
     public Integer getAnuenioAliquota() {
         return anuenioAliquota;
     }
@@ -509,7 +650,6 @@ public class FolhaBean implements Serializable{
             item = new SelectItem("Ensino Médio", 2);
             treinamentos.add(item);
         }
-        System.out.println("Passou aqui, cargo: " + this.getCargo());
         item = new SelectItem("Ensino Superior", 3);
         treinamentos.add(item);
         item = new SelectItem("Especialização (lato sensu)", 4);
@@ -568,19 +708,126 @@ public class FolhaBean implements Serializable{
         return anuenios;
     }
 
-    private void calculaVencimentoBasico() {
+    private void calculaVencimentoBasico() throws ClassNotFoundException, SQLException {
         //Busca o valor do vencimento no banco de dados
-        //apenas para teste
-        System.out.println("Passou pelo cálculo do vencimento básico!!!");
         
-        //setar o valor da variável VencimentoBásico valor no banco de dados. 
+        String sql = "SELECT vencimento FROM `MPUvencimentos` WHERE "
+                + "escolaridade=? and padrao=? and plano=? and anovigencia <= ? order by anovigencia desc limit 1; ";
+        
+        
+        Connection con = new ConectaMySQL().conectaUOL();
+        PreparedStatement pstmt = con.prepareStatement(sql);
+        pstmt.setInt(1, this.getCargo());
+        pstmt.setInt(2,this.getPadrao());
+        pstmt.setInt(3, this.getPlano());
+        pstmt.setInt(4, this.getAnoTabela());
+        
+        ResultSet rs;
+        rs = pstmt.executeQuery();
+        
+        rs.next();
+        this.setVencimentoBasicoValor(rs.getDouble("vencimento"));
+        con.close();
+        rs.close();
+        pstmt.close();
+                
     }
     
-    public String segundaPagina(){
+    public String segundaPagina() throws ClassNotFoundException, SQLException {
+        //Chama uma "prévia" de contra-cheque
+        //Até implementar o plano de 2006 (mais trabalhoso), vai permitir cálculos apenas dos planos vigentes.
+       
+        if(this.getPlano() == 2){
+            atualizaContraCheque();
+            FacesContext context = FacesContext.getCurrentInstance();
+            context.addMessage(null, new FacesMessage("Plano indisponível", 
+                    "Abaixo, você já pode visualizar uma prévia do salário \"mínimo\" de um servidor do MPU pelas informações previamente prestadas. \n Para maiores detalhes, preencha agora detalhes sobre funções, escolaridade, treinamentos e gratificações. "));
+            return "welcomePrimefaces";
+        }else{
+            FacesContext context = FacesContext.getCurrentInstance();
+            context.addMessage(null, new FacesMessage("Plano indisponível", "No momento só está disponível a simulação referente à Lei 12773/2012, que reajusta a GAJ para 90%!"));
+            return "index";
+        }
         
-        atualizaContraCheque();
+    }
+    
+    public double arredondar(double valor){
+        BigDecimal valorArredondado = new BigDecimal(valor).setScale(2, RoundingMode.FLOOR);
+        return valorArredondado.doubleValue();
+    }
+    
+    public List<SelectItem> buscarAnos(){
+        SelectItem item; 
+        List<SelectItem> anos = new ArrayList<>();
+        switch(this.getPlano()){
+            case 1:
+                for(int x = 2006; x <= 2012; x++){
+                     item = new SelectItem(Integer.toString(x), x);
+                     anos.add(item);
+                }
+                return anos; 
+            case 2:
+                for(int x = 2013; x <= 2015; x++){
+                     item = new SelectItem(Integer.toString(x), x);
+                     anos.add(item);
+                }
+                return anos; 
+            case 3:
+                for(int x = 2015; x <= 2015; x++){
+                     item = new SelectItem(Integer.toString(x), x);
+                     anos.add(item);
+                }
+                return anos; 
+        }
+        return anos;
+    }
+
+    private double calculaAuxilioAlimentacao() throws SQLException, ClassNotFoundException {
+        String sql = "SELECT valor FROM `MPUauxilios` WHERE "
+                + "ano <= ? and nivel=0 and orgao=1 order by ano desc, mes desc limit 1; ";
         
-        return "welcomePrimefaces";
+        
+        Connection con = new ConectaMySQL().conectaUOL();
+        PreparedStatement pstmt = con.prepareStatement(sql);
+        pstmt.setInt(1, this.getAnoTabela());
+        
+        ResultSet rs;
+        rs = pstmt.executeQuery();
+        
+        rs.next();
+        this.setAuxilioAlimentacaoValor(rs.getDouble("valor"));
+        con.close();
+        rs.close();
+        pstmt.close();
+        
+        return this.getAuxilioAlimentacaoValor();
+    }
+
+    private double calculaFuncao() throws ClassNotFoundException, SQLException {
+        /*
+        TODO
+        Caso haja um parcelamento no reajuste das funções, este algoritmo deve mudar. 
+        A consulta sql está bastante simples porque há apenas um valor de função para um nível num determinado ano, o que não é a realidade 
+        quando houve a implementação da lei 11415, por exemplo.
+        */
+        String sql = "SELECT valor FROM `MPUfuncoes` WHERE "
+                + "nivel = ? and plano=? limit 1; ";
+        
+        
+        Connection con = new ConectaMySQL().conectaUOL();
+        PreparedStatement pstmt = con.prepareStatement(sql);
+        pstmt.setInt(1, this.getFuncao());
+        pstmt.setInt(2, this.getPlano());
+        ResultSet rs;
+        rs = pstmt.executeQuery();
+        
+        rs.next();
+        this.setFuncaoValor(rs.getDouble("valor"));
+        con.close();
+        rs.close();
+        pstmt.close();
+        
+        return this.getFuncaoValor();
     }
     
 }

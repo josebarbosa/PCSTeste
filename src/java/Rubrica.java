@@ -1,5 +1,8 @@
 
 import java.io.Serializable;
+import javax.faces.bean.ManagedBean;
+import javax.faces.bean.SessionScoped;
+import javax.faces.view.ViewScoped;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -11,7 +14,8 @@ import java.io.Serializable;
  *
  * @author josebarbosa
  */
-class Rubrica implements Serializable{
+
+public class Rubrica implements Serializable{
     private String nome;
     private double valor;
     private boolean incidePrevidencia;

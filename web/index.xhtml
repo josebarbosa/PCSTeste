@@ -17,9 +17,10 @@ xmlns:p="http://primefaces.org/ui">
 
         <p:dialog modal="true" widgetVar="statusDialog" header="Processando"   
                   draggable="false" closable="false">  
-            <h:outputText value="Calculando número de níveis do plano escolhido..." />
+            <h:outputText value="Buscando valores no Banco de Dados..." />
         </p:dialog>
         <h:form id="formindex">
+            <p:growl id="growl" showDetail="true" /> 
             <h:panelGrid columns="2">
                 <h:outputText value="Escolha o plano que deseja simular:" />
                 <p:selectOneMenu id="plano" value="#{folhaBean.plano}">
@@ -37,7 +38,7 @@ xmlns:p="http://primefaces.org/ui">
                 </p:selectOneMenu>
             </h:panelGrid>
             
-            <h:commandButton value="Prosseguir" action="#{folhaBean.segundaPagina()}"/>
+            <h:commandLink value="Prosseguir" action="#{folhaBean.segundaPagina()}"/>
         </h:form>
     </h:body>
 </html>
