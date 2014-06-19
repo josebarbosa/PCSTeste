@@ -94,7 +94,35 @@ public class FolhaBean implements Serializable{
     private boolean possuiPenosidade;
     private boolean possuiPlanAssiste; 
     
-    private Rubrica rubrica; 
+    private Rubrica rubrica;
+    
+    //Construtor
+    public FolhaBean(){
+        this.planos = new ArrayList<>();
+        this.padroes = new ArrayList<>();
+        this.treinamentos = new ArrayList<>();
+        this.escolaridades = new ArrayList<>();
+        this.plano = 2;
+        this.padrao = 1;
+        this.pssAliquota = 11;
+        this.escolaridade = 2;
+        this.anoTabela = Calendar.getInstance().get(Calendar.YEAR);
+        this.treinamento = 0; 
+        this.cargo = 2;
+        this.pssAliquota = 11; 
+        this.salarioBrutoValor = 0.0;
+        this.basePSSValor = 0.0;
+        this.pssValor = 0.0;
+        this.baseIRRFValor = 0.0;
+        this.anuenioAliquota = 0; 
+        this.auxilioCrecheDependentes = 0;
+        this.baseIRRFValor = 0;
+        this.impostoDeRendaDependentes = 0;
+        this.salarioLiquidoValor = 0;
+        this.descontosValor = 0;
+        
+    }
+
 
     public Rubrica getRubrica() {
         return rubrica;
@@ -109,10 +137,10 @@ public class FolhaBean implements Serializable{
         creditos = new ArrayList<>();
         debitos = new ArrayList<>();
         calculaVencimentoBasico();
-        rubrica = new Rubrica("Vencimento Básico", this.getVencimentoBasicoValor(), true, true, true);
+        rubrica = new Rubrica("Vencimento Básico - Padrão: " + this.getPadrao(), this.getVencimentoBasicoValor(), true, true, true);
         creditos.add(rubrica);
         //Adiciona a gaj, conforme o ano
-        rubrica = new Rubrica("GAJ", calculaGAJ(this.getAnoTabela()), true, true, true);
+        rubrica = new Rubrica("GAMPU ", calculaGAJ(this.getAnoTabela()), true, true, true);
         creditos.add(rubrica);
         //Adiciona a VPI de R$ 59,87
         rubrica = new Rubrica("VPI - Lei 10.698/2003", 59.87, true, true, true);
@@ -158,13 +186,6 @@ public class FolhaBean implements Serializable{
             creditos.add(rubrica);
         }
         
-        //validações de teste
-        System.out.println("Cargo par ateste: " + this.getCargo());
-        System.out.println("Escolaridade par ateste: " + this.getEscolaridade());
-        System.out.println("Treinamento para teste: " + this.getTreinamento());
-        
-        
-        
         //Calcula adicional de qualificação, se superior ao requisito do cargo:
         if(this.getCargo() < this.getEscolaridade()){
             rubrica = new Rubrica("Adicional de Qualificação", calculaQualificacao(), true, true, true);
@@ -173,24 +194,139 @@ public class FolhaBean implements Serializable{
         
         //Calcula adicional de treinamento, se tiver horas
         if(this.getTreinamento() != 0){
-            rubrica = new Rubrica("Adicional de Treinamento", arredondar(this.getVencimentoBasicoValor() * this.getTreinamento() / 100), true, true, true);
-            creditos.add(rubrica);
+            for(int i=0; i < this.getTreinamento(); i++){
+                rubrica = new Rubrica("Adicional de Treinamento (1%)", arredondar(this.getVencimentoBasicoValor() * 0.01), false, true, true);
+                creditos.add(rubrica);
+            }
         }
         
         //auxilio alimentação
         rubrica = new Rubrica("Auxílio Alimentação", calculaAuxilioAlimentacao(), false, false, true);
         creditos.add(rubrica);
         
-        
+        //auxílio creche
+        if(this.getAuxilioCrecheDependentes()>0){
+            rubrica = new Rubrica("Auxílio Creche", calculaAuxilioCreche(), false, false, true);
+            creditos.add(rubrica);
+        }
         /*
         Cálculo dos débitos
         */
         //Após calcular todos os créditos, os primeiros cálculos consistem em apurar o salário bruto, e depois as bases de cálculo para PSS e IRRF, nesta ordem
         //(o valor do PSS interfere na base de cálculo do IRRF)
+        this.setSalarioBrutoValor(calculaBruto());
+        this.setBasePSSValor(calculaBasePSS());
+        this.setPssValor(calculaPSS(this.getPssAliquota()));
+        this.setBaseIRRFValor(calculaBaseIRRF());
         
+        //zera a lista de débitos antes de iniciá-la
+        debitos = new ArrayList<>();
+        rubrica = new Rubrica("PSS - Contribuição Previdenciária", this.getPssValor(), false, false, false);
+        debitos.add(rubrica);
+        rubrica = new Rubrica("IRRF - Imposto de Renda", calculaIRRF(), false, false, false); 
+        debitos.add(rubrica); 
+        
+        //fecha a tabela atualizando as últimas informações: total de descontos e salário líquido
+        this.setIrrfValor(calculaIRRF());
+        this.setDescontosValor(arredondar(this.getIrrfValor() + this.getPssValor()));
+        this.setSalarioLiquidoValor(arredondar(this.getSalarioBrutoValor() - this.getDescontosValor()));
         
     }
-    public double calculaQualificacao(){
+    private double calculaIRRF(){
+        double resposta = 0.0;
+        //início copia uolhost php
+        if(this.getAnoTabela() == 2012){
+            this.baseIRRFValor = this.baseIRRFValor - this.getImpostoDeRendaDependentes() * 164.56;
+            if(this.baseIRRFValor < 1637.11) return 0;
+            if(1637.12 <= this.baseIRRFValor && this.baseIRRFValor <= 2453.50) return arredondar((this.baseIRRFValor * 0.075 - 122.78));
+            if(2453.51 <= this.baseIRRFValor && this.baseIRRFValor <= 3271.38) return arredondar((this.baseIRRFValor * 0.150 - 306.80));
+            if(3271.39 <= this.baseIRRFValor && this.baseIRRFValor <= 4087.65) return arredondar((this.baseIRRFValor * 0.225 - 552.15));
+            return arredondar(this.baseIRRFValor * 0.275 - 756.53 );
+        }
+        //calcula imposto do ano de 2013
+        if(this.getAnoTabela() == 2013){
+            this.baseIRRFValor = this.baseIRRFValor - this.getImpostoDeRendaDependentes() * 171.97;
+            if(this.baseIRRFValor < 1710.78) return 0;
+                if(1710.79 <= this.baseIRRFValor && this.baseIRRFValor <= 2563.91) return arredondar((this.baseIRRFValor * 0.075 - 128.31));
+                if(2563.92 <= this.baseIRRFValor && this.baseIRRFValor <= 3418.59) return arredondar((this.baseIRRFValor * 0.15 - 320.60));
+                if(3418.60 <= this.baseIRRFValor && this.baseIRRFValor <= 4271.59) return arredondar((this.baseIRRFValor * 0.225 - 577));
+                return arredondar((this.baseIRRFValor * 0.275 - 790.58 ));
+        }
+
+
+        //calcula imposto de 2014 . 
+       if(this.getAnoTabela() == 2014){
+            this.baseIRRFValor = this.baseIRRFValor - this.getImpostoDeRendaDependentes() * 179.71;
+            if(this.baseIRRFValor < 1787.77) return 0;
+            if(1787.78 <= this.baseIRRFValor && this.baseIRRFValor <= 2679.29) return arredondar((this.baseIRRFValor * 0.075 - 134.08));
+            if(2679.30 <= this.baseIRRFValor && this.baseIRRFValor <= 3572.43) return arredondar((this.baseIRRFValor * 0.150 - 335.03));
+            if(3572.44 <= this.baseIRRFValor && this.baseIRRFValor <= 4463.81) return arredondar((this.baseIRRFValor * 0.225 - 602.96));
+            return arredondar((this.baseIRRFValor * 0.275 - 826.15));
+        }
+        
+        //Considera uma correçao de 4,5% na tabela, embora ainda nao tenha sido formalmente adotada
+        //Calcula o ano de 2015
+        if(this.getAnoTabela() == 2015){
+            this.baseIRRFValor = this.baseIRRFValor - this.getImpostoDeRendaDependentes() * 187.8;
+            if(this.baseIRRFValor <= 1868.22) return 0;
+            if(1868.23 <= this.baseIRRFValor && this.baseIRRFValor <= 2799.86) return arredondar((this.baseIRRFValor * 0.075 - 140.12));
+            if(2799.87 <= this.baseIRRFValor && this.baseIRRFValor <= 3733.19) return arredondar((this.baseIRRFValor * 0.150 - 350.11));
+            if(3733.2 <= this.baseIRRFValor && this.baseIRRFValor <= 4664.68) return arredondar((this.baseIRRFValor * 0.225 - 630.1));
+            return arredondar((this.baseIRRFValor * 0.275 - 863.33));
+        }
+        //termino copia do uolhost php
+        return resposta; 
+    }
+    private double calculaBaseIRRF(){
+        //Esta função não vai considerar a dedução de dependentes, apenas calculará os valores sujeitos à tributação descontada a contribuição previdenciária
+        double resposta = 0; 
+        for(int i=0; i < creditos.size(); i++){
+            if(creditos.get(i).isIncideImpostodeRenda())resposta += creditos.get(i).getValor();
+        }
+        return resposta - this.getPssValor();
+    }
+    private double calculaPSS(double aliquota){
+        double teto = 0.0; 
+        double aliquotaCalculo = 0.0;
+        switch(this.getAnoTabela()){
+            case 2014:
+                teto = 4390.24;
+                break;
+            case 2013: 
+                teto = 4159.00;
+                break;
+            case 2012: 
+                teto = 3916.20;
+                break;
+            default:
+                teto = 4390.24;
+                break;
+        }
+        //calcula a aliquota acima do teto do regime geral
+        if(aliquota == 0) aliquotaCalculo = 0;
+        if(aliquota == 11) aliquotaCalculo = 0.11;
+        if(aliquota > 0 && aliquota != 11) aliquotaCalculo = (8+aliquota)/200; 
+        if(this.getBasePSSValor() < teto) return arredondar(this.getBasePSSValor()*0.11);
+        else return arredondar((this.getBasePSSValor() - teto) * aliquotaCalculo + teto * 0.11);  
+    }
+    private double calculaBasePSS(){
+        //zera o valor do salário bruto para percorrer a lista
+        double resposta = 0; 
+        for(int i=0; i < creditos.size(); i++){
+            if(creditos.get(i).isIncidePrevidencia())resposta += creditos.get(i).getValor();
+        }
+        return resposta;
+    
+    }
+    private double calculaBruto(){
+        //zera o valor do salário bruto para percorrer a lista
+        double resposta = 0; 
+        for(int i=0; i < creditos.size(); i++){
+            resposta += creditos.get(i).getValor();
+        }
+        return resposta;
+    }
+    private double calculaQualificacao(){
         switch(this.getEscolaridade()){
             case 3:
                 return arredondar(this.getVencimentoBasicoValor() * 0.05);
@@ -222,21 +358,7 @@ public class FolhaBean implements Serializable{
         return arredondar(this.getVencimentoBasicoValor() * gaj); 
     }
     
-    public FolhaBean(){
-        this.planos = new ArrayList<>();
-        this.padroes = new ArrayList<>();
-        this.treinamentos = new ArrayList<>();
-        this.escolaridades = new ArrayList<>();
-        this.plano = 2;
-        this.padrao = 1;
-        this.pssAliquota = 11;
-        this.escolaridade = 2;
-        this.anoTabela = Calendar.getInstance().get(Calendar.YEAR);
-        this.treinamento = 0; 
-        this.cargo = 2;
-        
-    }
-
+    
     public Integer getAnoTabela() {
         return anoTabela;
     }
@@ -737,10 +859,12 @@ public class FolhaBean implements Serializable{
         //Chama uma "prévia" de contra-cheque
         //Até implementar o plano de 2006 (mais trabalhoso), vai permitir cálculos apenas dos planos vigentes.
        
-        if(this.getPlano() == 2){
+        if(this.getPlano() > 1){
+            //atualiza o construtor do ano caso o plano escolhido seja 3
+            if(this.getPlano() == 3) this.setAnoTabela(2015);
             atualizaContraCheque();
             FacesContext context = FacesContext.getCurrentInstance();
-            context.addMessage(null, new FacesMessage("Plano indisponível", 
+            context.addMessage(null, new FacesMessage("Prévia calculada", 
                     "Abaixo, você já pode visualizar uma prévia do salário \"mínimo\" de um servidor do MPU pelas informações previamente prestadas. \n Para maiores detalhes, preencha agora detalhes sobre funções, escolaridade, treinamentos e gratificações. "));
             return "welcomePrimefaces";
         }else{
@@ -752,7 +876,7 @@ public class FolhaBean implements Serializable{
     }
     
     public double arredondar(double valor){
-        BigDecimal valorArredondado = new BigDecimal(valor).setScale(2, RoundingMode.FLOOR);
+        BigDecimal valorArredondado = new BigDecimal(valor).setScale(2, RoundingMode.UP);
         return valorArredondado.doubleValue();
     }
     
@@ -802,6 +926,42 @@ public class FolhaBean implements Serializable{
         
         return this.getAuxilioAlimentacaoValor();
     }
+    public void aumentaAno() throws ClassNotFoundException, SQLException{
+        if(this.getAnoTabela() < 2015 && this.getPlano() == 2) this.setAnoTabela(this.getAnoTabela() + 1);
+        else {
+            FacesContext context = FacesContext.getCurrentInstance();
+            context.addMessage(null, new FacesMessage("Erro", 
+                        "Não é possível aumentar. "));
+        }
+        atualizaContraCheque();
+    }
+    public void diminuiAno() throws ClassNotFoundException, SQLException{
+        if(this.getAnoTabela() > 2013 && this.getPlano() == 2) this.setAnoTabela(this.getAnoTabela() - 1);
+        else {
+            FacesContext context = FacesContext.getCurrentInstance();
+            context.addMessage(null, new FacesMessage("Erro", 
+                        "Não é possível diminuir. "));
+        }
+        atualizaContraCheque();
+    }
+    public void aumentaPadrao() throws ClassNotFoundException, SQLException{
+        if(this.getPadrao() < 13) this.setPadrao(this.getPadrao() + 1);
+        else {
+            FacesContext context = FacesContext.getCurrentInstance();
+            context.addMessage(null, new FacesMessage("Erro", 
+                        "Não é possível aumentar. "));
+        }
+        atualizaContraCheque();
+    }
+    public void diminuiPadrao() throws ClassNotFoundException, SQLException{
+        if(this.getPadrao() > 1) this.setPadrao(this.getPadrao() - 1);
+        else {
+            FacesContext context = FacesContext.getCurrentInstance();
+            context.addMessage(null, new FacesMessage("Erro", 
+                        "Não é possível diminuir. "));
+        }
+        atualizaContraCheque();
+    }
 
     private double calculaFuncao() throws ClassNotFoundException, SQLException {
         /*
@@ -828,6 +988,27 @@ public class FolhaBean implements Serializable{
         pstmt.close();
         
         return this.getFuncaoValor();
+    }
+    
+    private double calculaAuxilioCreche() throws SQLException, ClassNotFoundException {
+        String sql = "SELECT valor FROM `MPUauxilios` WHERE "
+                + "ano <= ? and nivel=1 and orgao=1 order by ano desc, mes desc limit 1; ";
+        
+        
+        Connection con = new ConectaMySQL().conectaUOL();
+        PreparedStatement pstmt = con.prepareStatement(sql);
+        pstmt.setInt(1, this.getAnoTabela());
+        
+        ResultSet rs;
+        rs = pstmt.executeQuery();
+        
+        rs.next();
+        this.setAuxilioCrecheValor((rs.getDouble("valor")*this.getAuxilioCrecheDependentes()));
+        con.close();
+        rs.close();
+        pstmt.close();
+        
+        return this.getAuxilioCrecheValor();
     }
     
 }

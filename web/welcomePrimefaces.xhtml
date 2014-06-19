@@ -14,27 +14,20 @@
         </h:head>
 
         <h:body>
+            <p:ajaxStatus onstart="statusDialog.show();" oncomplete="statusDialog.hide();"/>  
 
+            <p:dialog modal="true" widgetVar="statusDialog" header="Processando Dados"   
+                          draggable="false" closable="false">  
+                <h:outputText value="Aguarde..." />
+            </p:dialog>
             <p:layout fullPage="true">
 
 
                 <p:layoutUnit position="west" size="490" >
-                    <p:ajaxStatus onstart="statusDialog.show();" oncomplete="statusDialog.hide();"/>  
-
-                    <p:dialog modal="true" widgetVar="statusDialog" header="Processando Dados"   
-                              draggable="false" closable="false">  
-                        <h:outputText value="Aguarde..." />
-                    </p:dialog>
+                    
                     <h:form id="form2">
                         <p:growl id="growl" showDetail="true" />  
                         <h:panelGrid columns="2">
-                            <h:outputText value="Escolha o ano que deseja simular:" />
-                            <p:selectOneMenu id="anoTabela" value="#{folhaBean.anoTabela}">
-                                <f:selectItems value="#{folhaBean.buscarAnos()}" id="ListaAnos"
-                                   var="anoCalculo"
-                                   itemLabel="#{anoCalculo.descricao}"
-                                   itemValue="#{anoCalculo.valor}" />
-                            </p:selectOneMenu>
                             
                             <h:outputText value="Possui função comissionada?"/>
                             <p:selectBooleanButton offLabel="Não" onLabel="Sim" id="possuifuncao" value="#{folhaBean.possuiFuncao}">
@@ -138,33 +131,58 @@
                 </p:layoutUnit>
 
                 <p:layoutUnit position="center" id="painelPrincipal">
-                    <h3>Resultado da Simulação</h3>
+                    
                         <p:outputPanel autoUpdate="true">
+                            <h:form id="anopadrao">
                         <p:dataTable id="creditosLista" var="creditos" value="#{folhaBean.creditos}">
                             <f:facet name="header">
-                                Créditos
+                                <p:commandButton icon="ui-icon-circle-minus" actionListener="#{folhaBean.diminuiAno()}"/> 
+                                Ano: #{folhaBean.anoTabela}
+                                <p:commandButton icon="ui-icon-circle-plus" actionListener="#{folhaBean.aumentaAno()}"/> 
+                                <p:outputLabel value=" Atualize os valores para novos cálculos " />
+                                <p:commandButton icon="ui-icon-circle-minus" actionListener="#{folhaBean.diminuiPadrao()}" /> 
+                                Padrão: #{folhaBean.padrao}
+                                <p:commandButton icon="ui-icon-circle-plus" actionListener="#{folhaBean.aumentaPadrao()}"/> 
                             </f:facet>
-                            <p:column>
+                            <p:column headerText="Descrição">
                                 <h:outputText value="#{creditos.nome}" />
                             </p:column>
-                            <p:column>
+                            <p:column style="text-align: left; size: 145" headerText="Valor">
                                 <h:outputText value="#{creditos.valor}" >
                                     <f:convertNumber type="currency" />
                                 </h:outputText>
                             </p:column>
                         </p:dataTable>
-
+                                </h:form>
                         <p:dataTable id="debitosLista" var="debitos" value="#{folhaBean.debitos}">
-                            <f:facet name="header">
-                                Débitos
-                            </f:facet>
-                            <p:column>
+                           
+                            <p:column >
                                 <h:outputText value="#{debitos.nome}" />
                             </p:column>
-                            <p:column>
-                                <h:outputText value="#{debitos.valor}" />
+                            <p:column style="text-align: right; size: 145" >
+                                <h:outputText value="#{debitos.valor}" style="color: red">
+                                    <f:convertNumber type="currency" />
+                                </h:outputText>
                             </p:column>
                         </p:dataTable>
+                            <p:panelGrid columns="3" >
+                                <f:facet name="header">
+                                    Total:
+                                </f:facet>                                    
+                                <p:outputLabel value="Salário Bruto:" />
+                                <p:outputLabel value="Descontos:" />
+                                <p:outputLabel value="Salário Líquido:" />
+                                <p:outputLabel value="#{folhaBean.salarioBrutoValor}" style="font-weight: bold" >
+                                    <f:convertNumber type="currency" />
+                                </p:outputLabel>
+                                <p:outputLabel value="#{folhaBean.descontosValor}"  >
+                                    <f:convertNumber type="currency" />
+                                </p:outputLabel>
+                                <p:outputLabel value="#{folhaBean.salarioLiquidoValor}" style="font-weight: bold; color: blue" >
+                                    <f:convertNumber type="currency" />
+                                </p:outputLabel>
+                                
+                            </p:panelGrid>
                     </p:outputPanel>
                 </p:layoutUnit>
  
