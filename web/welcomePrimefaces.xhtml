@@ -149,7 +149,7 @@
                             </p:column>
                             <p:column style="text-align: left; size: 145" headerText="Valor">
                                 <h:outputText value="#{creditos.valor}" >
-                                    <f:convertNumber type="currency" />
+                                    <f:convertNumber type="currency" currencyCode="BRL"/>
                                 </h:outputText>
                             </p:column>
                         </p:dataTable>
@@ -161,7 +161,7 @@
                             </p:column>
                             <p:column style="text-align: right; size: 145" >
                                 <h:outputText value="#{debitos.valor}" style="color: red">
-                                    <f:convertNumber type="currency" />
+                                    <f:convertNumber type="currency"  currencyCode="BRL"/>
                                 </h:outputText>
                             </p:column>
                         </p:dataTable>
@@ -173,13 +173,13 @@
                                 <p:outputLabel value="Descontos:" />
                                 <p:outputLabel value="Salário Líquido:" />
                                 <p:outputLabel value="#{folhaBean.salarioBrutoValor}" style="font-weight: bold" >
-                                    <f:convertNumber type="currency" />
+                                    <f:convertNumber type="currency"  currencyCode="BRL"/>
                                 </p:outputLabel>
                                 <p:outputLabel value="#{folhaBean.descontosValor}"  >
-                                    <f:convertNumber type="currency" />
+                                    <f:convertNumber type="currency"  currencyCode="BRL"/>
                                 </p:outputLabel>
                                 <p:outputLabel value="#{folhaBean.salarioLiquidoValor}" style="font-weight: bold; color: blue" >
-                                    <f:convertNumber type="currency" />
+                                    <f:convertNumber type="currency"  currencyCode="BRL"/>
                                 </p:outputLabel>
                                 
                             </p:panelGrid>

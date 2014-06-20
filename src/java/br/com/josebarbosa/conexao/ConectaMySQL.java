@@ -30,7 +30,7 @@ public class ConectaMySQL {
         try{
             Class.forName("com.mysql.jdbc.Driver"); 
             conexao = DriverManager.getConnection
-        ("jdbc:mysql://$OPENSHIFT_MYSQL_DB_HOST:$OPENSHIFT_MYSQL_DB_PORT/", "adminmT3IUEi", "sC9dGnxNzXRH");
+        ("jdbc:mysql://$OPENSHIFT_MYSQL_DB_HOST:$OPENSHIFT_MYSQL_DB_PORT/pcs", "admink9pXQ5d", "xc3hYmTW5WLt");
         }catch(SQLException e){
             throw new RuntimeException(e);
         }

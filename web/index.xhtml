@@ -38,7 +38,7 @@ xmlns:p="http://primefaces.org/ui">
                 </p:selectOneMenu>
             </h:panelGrid>
             
-            <h:commandLink value="Prosseguir" action="#{folhaBean.segundaPagina()}"/>
+            <p:commandButton value="Prosseguir" actionListener="#{folhaBean.segundaPagina()}"/>
         </h:form>
     </h:body>
 </html>
